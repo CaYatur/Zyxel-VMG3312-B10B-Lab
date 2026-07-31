@@ -1,6 +1,11 @@
 (function(){
   'use strict';
 
+  if(window.top !== window.self){
+    window.top.location.replace('/pages/tabFW/tabFW.html?caya=1' + (window.location.hash || ''));
+    return;
+  }
+
   var modules = Array.isArray(window.CAYA_LIVE_MODULES) ? window.CAYA_LIVE_MODULES : [];
   var bridge = document.getElementById('bridgeFrame');
   var panel = document.getElementById('nativePanel');
@@ -236,13 +241,21 @@
     var legend = form.querySelector('legend,h1,h2,h3,.title,.step-title');
     heading.textContent = legend && clean(legend.textContent) ? clean(legend.textContent) : ('Ayar Grubu ' + (index + 1));
     card.appendChild(heading);
+
+    var formTables = Array.prototype.slice.call(form.querySelectorAll('table')).filter(function(table){
+      return table.querySelectorAll('tr').length > 1;
+    });
+    formTables.slice(0, 12).forEach(function(table){
+      card.appendChild(renderTable(table));
+    });
+
     var grid = document.createElement('div');
     grid.className = 'native-grid';
     Array.prototype.forEach.call(form.elements, function(control){
       var field = proxyControl(control, doc);
       if(field){grid.appendChild(field);}
     });
-    card.appendChild(grid);
+    if(grid.children.length){card.appendChild(grid);}
     var actions = document.createElement('div');
     actions.className = 'native-actions';
     var buttons = form.querySelectorAll('button,input[type=submit],input[type=button],input[type=reset],input[type=image]');
@@ -266,17 +279,19 @@
     var inner = outer.querySelector('iframe#mainFrame,iframe[name="mainFrame"]');
     if(inner){
       try{
-        var innerDoc = inner.contentDocument || inner.contentWindow.document;
-        if(innerDoc && innerDoc.body && innerDoc.readyState !== 'loading'){
-          if(!inner.dataset.cayaBound){
-            inner.dataset.cayaBound = '1';
-            inner.addEventListener('load', function(){window.setTimeout(renderBridge, 180);});
-          }
-          return innerDoc;
+        if(!inner.dataset.cayaBound){
+          inner.dataset.cayaBound = '1';
+          inner.addEventListener('load', function(){window.setTimeout(renderBridge, 220);});
         }
+        var innerDoc = inner.contentDocument || inner.contentWindow.document;
+        if(!innerDoc || !innerDoc.body || innerDoc.readyState === 'loading'){return null;}
+        var panelNode = innerDoc.querySelector('#contentPanel,form,table,input,select,textarea,button');
+        if(!panelNode || !clean(innerDoc.body.textContent)){return null;}
+        return innerDoc;
       }catch(ignore){return null;}
     }
-    return outer;
+    var directNode = outer.querySelector('#contentPanel,form,table,input,select,textarea,button');
+    return directNode && clean(outer.body.textContent) ? outer : null;
   }
 
   function waitForBridge(token, attempt){
@@ -287,7 +302,7 @@
       renderBridge();
       return;
     }
-    if(attempt >= 30){setStatus('Modem sayfası zamanında yüklenmedi.', 'error');return;}
+    if(attempt >= 60){setStatus('Modem sayfası zamanında yüklenmedi.', 'error');return;}
     window.setTimeout(function(){waitForBridge(token, attempt + 1);}, 180);
   }
 
