@@ -1,10 +1,10 @@
-# CaYaRouter
+# CaYaRouter Lab — Zyxel VMG3312-B10B
 
-> **Experimental:** This project is under active research and is not ready for production use or firmware flashing.
+> **Experimental:** This repository documents research and customization work on an existing Zyxel VMG3312-B10B. It is not a finished router product, an original modem design, or production-ready firmware.
 
-CaYaRouter is an experimental management, reverse-engineering, and firmware-research project for the **Zyxel VMG3312-B10B** router/modem.
+CaYaRouter Lab is a device-specific workspace for examining and improving the management interface and firmware structure of the **Zyxel VMG3312-B10B**.
 
-The long-term goal is to build a modern CaYaRouter management layer while preserving the stock Broadcom kernel, DSL, Wi-Fi, Ethernet, and hardware-acceleration components that are difficult to replace safely.
+The goal is to preserve the modem's stock Broadcom hardware layer while researching a safer, modern management interface and carefully scoped feature additions.
 
 ## Current capabilities
 
