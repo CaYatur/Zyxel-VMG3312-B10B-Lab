@@ -10,32 +10,38 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark">C</span><div><strong>CaYaRouter</strong><small>VMG3312-B10B</small></div></div>
-      <label class="search"><span>Ara</span><input id="moduleSearch" type="search" placeholder="Ayar veya mod&uuml;l ara"></label>
-      <nav id="mainNav" aria-label="Ana men&uuml;"></nav>
+      <label class="search"><span>Ara</span><input id="moduleSearch" type="search" placeholder="Ayar veya modül ara"></label>
+      <nav id="mainNav" aria-label="Ana menü"></nav>
       <div class="sidebar-footer">
-        <a class="stock-link" href="/pages/connectionStatus/naviView_partialLoad.html" target="moduleFrame">Stok durum sayfası</a>
-        <button id="logoutButton" class="logout-button" type="button">&Ccedil;ıkış yap</button>
+        <button id="logoutButton" class="logout-button" type="button">Çıkış yap</button>
       </div>
     </aside>
 
     <main class="main-area">
       <header class="topbar">
-        <div><small>CANLI MODEM Y&Ouml;NETİMİ</small><h1 id="pageTitle">Genel Bakış</h1></div>
-        <div class="top-actions"><span class="live-badge">Ger&ccedil;ek Zyxel sayfaları</span><button id="reloadButton" type="button">Yenile</button></div>
+        <div><small>CANLI MODEM YÖNETİMİ</small><h1 id="pageTitle">Genel Bakış</h1></div>
+        <div class="top-actions"><span id="liveBadge" class="live-badge">Canlı cihaz verisi</span><button id="reloadButton" type="button">Yenile</button></div>
       </header>
 
       <section class="notice">
-        Bu aray&uuml;z sahte hız, cihaz sayısı veya bağlantı istatistiği &uuml;retmez. Aşağıdaki i&ccedil;erik doğrudan modemin kendi sayfalarından gelir ve Kaydet/Uygula işlemleri ger&ccedil;ek cihaza uygulanır.
+        CaYaRouter doğrulanmamış değer üretmez. Alanlar modemin canlı yapılandırmasından okunur; Kaydet ve Uygula işlemleri cihazın gerçek CGI/CMD/WL uçlarına gönderilir.
       </section>
 
       <section id="moduleCatalog" class="catalog" hidden></section>
 
       <section id="viewer" class="viewer">
-        <div class="viewer-head"><div><small>CANLI MOD&Uuml;L</small><strong id="viewerTitle">Ağ Haritası ve Durum</strong></div><span id="viewerPath"></span></div>
-        <iframe id="moduleFrame" name="moduleFrame" title="Canlı modem ayarları" src="/pages/connectionStatus/naviView_partialLoad.html"></iframe>
+        <div class="viewer-head">
+          <div><small>YEREL AYAR EKRANI</small><strong id="viewerTitle">Genel Bakış</strong></div>
+          <span id="viewerPath"></span>
+        </div>
+        <div id="pageTabs" class="page-tabs"></div>
+        <div id="statusBar" class="status-bar" role="status">Modem verisi yükleniyor…</div>
+        <div id="nativePanel" class="native-panel"></div>
       </section>
     </main>
   </div>
+
+  <iframe id="bridgeFrame" class="bridge-frame" title="Zyxel ayar köprüsü" aria-hidden="true"></iframe>
   <script src="/caya/live-modules.js"></script>
   <script src="/caya/caya-app.js"></script>
 </body>

@@ -3,8 +3,9 @@
 ## Goal
 
 Build a VMG3312-B10B `ras.bin` candidate whose main `/index.html` and login
-screen use CaYaRouter, while the original Zyxel settings pages remain available
-as live same-origin modules.
+screen use CaYaRouter. Stock Zyxel pages remain reachable only by direct URL;
+the visible CaYaRouter interface renders their live controls and tables as its
+own native components through a hidden same-origin bridge.
 
 ## Confirmed base parameters
 
@@ -89,21 +90,22 @@ images are excluded.
 
 ## Live integration and release status
 
-The CaYaRouter shell maps 31 verified stock modules and 68 stock pages. A local
-same-origin gateway authenticated against the real modem and verified all 61
-safe inventory pages. It found 52 form actions; all 52 remain same-origin and
-therefore submit to the original Zyxel CGI, CMD, and WL handlers.
+The CaYaRouter shell maps 31 verified stock modules and 68 stock pages. The
+native adapter verified all 68 pages against the real modem and identified 63
+forms, 472 live controls, 115 action buttons, and 25 information tables. The
+34 pages that depend on stock `parent`/dialog helpers run inside a hidden
+same-origin `tabFW` bridge; the stock UI itself is never shown in CaYaRouter.
 
 The current corrected, git-ignored release candidate is:
 
 ```text
-.caya-agent/build/release-liveonly/CaYaRouter-VMG3312-B10B-AAPP7.bin
+.caya-agent/build/release-native/CaYaRouter-VMG3312-B10B-AAPP7.bin
 ```
 
 Release SHA-256:
 
 ```text
-a2b5a3c3e3681480ab572bb46dcbb9b4c963e94781c94d08e48970013a32264a
+36646b3a04778e032148d6a207c5022d5ef85bd90479385c732279654571ec84
 ```
 
 The default management accounts are intentionally configured as requested:
@@ -124,8 +126,8 @@ login page, and the authorized tab shell), seven expected CaYaRouter files, and
 partition. UI validation also proves that fake speed values, demo localStorage,
 and the previous `full-app.js` are absent.
 
-The currently installed second firmware remains operational, but this corrected
-live-only candidate has not been sent to the modem. A third controlled device
-test requires separate, explicit final approval. Passing the offline and live
-tests is not a recovery guarantee; stock recovery still depends on the
+The currently installed live-only firmware remains operational, but this newer
+native-adapter candidate has not been sent to the modem. Another controlled
+device test requires separate, explicit final approval. Passing the offline and
+live tests is not a recovery guarantee; stock recovery still depends on the
 bootloader and recovery web path remaining intact.
