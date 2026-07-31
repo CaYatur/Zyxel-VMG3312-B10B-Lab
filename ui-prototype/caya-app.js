@@ -442,6 +442,177 @@
     window.setTimeout(function(){waitForBridge(token, attempt + 1);}, 180);
   }
 
+  function wirelessField(card, labelText, source, kind){
+    if(!source){return null;}
+    var field = document.createElement('div');
+    field.className = 'native-field';
+    var label = document.createElement('label');
+    label.textContent = labelText;
+    field.appendChild(label);
+    var proxy;
+    if(kind === 'toggle'){
+      proxy = document.createElement('input');
+      proxy.type = 'checkbox';
+      proxy.checked = Boolean(source.checked);
+      var row = document.createElement('div');
+      row.className = 'choice-row';
+      row.appendChild(proxy);
+      var state = document.createElement('span');
+      state.textContent = proxy.checked ? 'Etkin' : 'Devre dışı';
+      proxy.addEventListener('change', function(){state.textContent = proxy.checked ? 'Etkin' : 'Devre dışı';});
+      row.appendChild(state);
+      field.appendChild(row);
+    }else if(source.tagName === 'SELECT'){
+      proxy = document.createElement('select');
+      Array.prototype.forEach.call(source.options, function(option){
+        var copy = document.createElement('option');
+        copy.value = option.value;
+        copy.textContent = clean(option.textContent) || option.value;
+        copy.selected = option.selected;
+        proxy.appendChild(copy);
+      });
+    }else{
+      proxy = document.createElement('input');
+      proxy.type = kind === 'password' ? 'password' : 'text';
+      proxy.value = source.value || '';
+      if(source.maxLength > 0){proxy.maxLength = source.maxLength;}
+      if(kind === 'password'){proxy.autocomplete = 'new-password';}
+    }
+    proxy.disabled = Boolean(source.disabled);
+    field.appendChild(proxy);
+    card.appendChild(field);
+    return {source:source, proxy:proxy, kind:kind || 'value'};
+  }
+
+  function renderWirelessGeneral(doc){
+    var form = Array.prototype.find.call(doc.forms || [], function(item){
+      return /wireless-general\.wl/i.test(item.getAttribute('action') || '');
+    });
+    if(!form){return false;}
+
+    panel.innerHTML = '';
+    controlLinks = [];
+    var bindings = [];
+    var sourceWindow = doc.defaultView || bridge.contentWindow;
+
+    var basic = document.createElement('section');
+    basic.className = 'native-card';
+    var basicTitle = document.createElement('h2');
+    basicTitle.textContent = 'Kablosuz Ağ';
+    basic.appendChild(basicTitle);
+    var basicGrid = document.createElement('div');
+    basicGrid.className = 'native-grid';
+    basic.appendChild(basicGrid);
+
+    var enabledRadios = form.elements.wlEnbl;
+    var enabledField = document.createElement('div');
+    enabledField.className = 'native-field';
+    var enabledLabel = document.createElement('label');
+    enabledLabel.textContent = 'Kablosuz ağ durumu';
+    enabledField.appendChild(enabledLabel);
+    var enabledSelect = document.createElement('select');
+    enabledSelect.innerHTML = '<option value="1">Etkin</option><option value="0">Devre dışı</option>';
+    if(enabledRadios && enabledRadios.length){enabledSelect.value = enabledRadios[0].checked ? '1' : '0';}
+    enabledField.appendChild(enabledSelect);
+    basicGrid.appendChild(enabledField);
+
+    [
+      ['SSID (Ağ adı)', form.elements.wlSsid],
+      ['Frekans bandı', form.elements.wlBand],
+      ['Kanal', form.elements.wlChannel],
+      ['Kanal genişliği', form.elements.wlNBwCap],
+      ['Kontrol yan bandı', form.elements.wlNCtrlsb],
+      ['Azami bağlı cihaz', form.elements.wlMaxAssoc]
+    ].forEach(function(item){var binding = wirelessField(basicGrid, item[0], item[1]);if(binding){bindings.push(binding);}});
+    [
+      ['SSID yayınını gizle', form.elements.wl_hide],
+      ['İstemci izolasyonu', form.elements.wl_apisolate],
+      ['BSSID izolasyonu', form.elements.wl_mbssisolate],
+      ['Multicast iyileştirme', form.elements.wl_enablewmf]
+    ].forEach(function(item){var binding = wirelessField(basicGrid, item[0], item[1], 'toggle');if(binding){bindings.push(binding);}});
+    panel.appendChild(basic);
+
+    var security = document.createElement('section');
+    security.className = 'native-card';
+    var securityTitle = document.createElement('h2');
+    securityTitle.textContent = 'Güvenlik';
+    security.appendChild(securityTitle);
+    var securityGrid = document.createElement('div');
+    securityGrid.className = 'native-grid';
+    security.appendChild(securityGrid);
+    var securityBinding = wirelessField(securityGrid, 'Güvenlik modu', form.elements.moreSecurity);
+    if(securityBinding){bindings.push(securityBinding);}
+    var defaultWpaBinding = wirelessField(securityGrid, 'Cihazın varsayılan Wi-Fi parolasını kullan', form.elements.wl_usedefaultwpakey, 'toggle');
+    if(defaultWpaBinding){bindings.push(defaultWpaBinding);}
+    var passphraseBinding = wirelessField(securityGrid, 'WPA/WPA2 kablosuz ağ parolası', form.elements.wlWpaPsk, 'password');
+    if(passphraseBinding){bindings.push(passphraseBinding);}
+    if(defaultWpaBinding && passphraseBinding){
+      var updatePasswordAvailability = function(){
+        passphraseBinding.proxy.disabled = defaultWpaBinding.proxy.checked;
+      };
+      defaultWpaBinding.proxy.addEventListener('change', updatePasswordAvailability);
+      updatePasswordAvailability();
+    }
+    panel.appendChild(security);
+
+    var limits = document.createElement('section');
+    limits.className = 'native-card';
+    var limitsTitle = document.createElement('h2');
+    limitsTitle.textContent = 'Bant Genişliği Sınırları';
+    limits.appendChild(limitsTitle);
+    var limitsGrid = document.createElement('div');
+    limitsGrid.className = 'native-grid';
+    limits.appendChild(limitsGrid);
+    [
+      ['Azami yükleme hızı (Kbps)', form.elements.wlMaxBandwidth],
+      ['Azami indirme hızı (Kbps)', form.elements.wlMaxDownBandwidth]
+    ].forEach(function(item){var binding = wirelessField(limitsGrid, item[0], item[1]);if(binding){bindings.push(binding);}});
+    panel.appendChild(limits);
+
+    var actions = document.createElement('div');
+    actions.className = 'native-actions wireless-save-actions';
+    var save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'native-action';
+    save.textContent = 'Kaydet ve Uygula';
+    save.addEventListener('click', function(){
+      try{
+        if(enabledRadios && enabledRadios.length){
+          enabledRadios[0].checked = enabledSelect.value === '1';
+          enabledRadios[1].checked = enabledSelect.value === '0';
+        }
+        bindings.forEach(function(binding){
+          var source = binding.source;
+          var proxy = binding.proxy;
+          if(binding.kind === 'toggle'){
+            if(source.checked !== proxy.checked && typeof source.click === 'function'){
+              source.click();
+            }
+            source.checked = proxy.checked;
+          }else if(source.tagName === 'SELECT'){
+            var previous = source.value;
+            source.value = proxy.value;
+            if(previous !== source.value){source.dispatchEvent(new Event('change', {bubbles:true}));}
+          }else{
+            source.value = proxy.value;
+          }
+        });
+        if(!form.elements.wlSsid || !clean(form.elements.wlSsid.value)){throw new Error('SSID boş bırakılamaz.');}
+        setStatus('Kablosuz ayarları stok Zyxel doğrulamasından geçirilip modeme gönderiliyor…');
+        if(sourceWindow && typeof sourceWindow.doSubmit === 'function'){
+          sourceWindow.doSubmit();
+        }else{
+          throw new Error('Stok kablosuz kayıt işlevi bulunamadı.');
+        }
+        window.setTimeout(function(){setStatus('Kablosuz ayar isteği gönderildi; cihaz yanıtı bekleniyor.', 'success');}, 300);
+      }catch(error){setStatus('Kablosuz ayarlar kaydedilemedi: ' + error.message, 'error');}
+    });
+    actions.appendChild(save);
+    basic.appendChild(actions);
+    setStatus('Kablosuz Ağ alanları canlı cihazdan yüklendi. Gizli WL yardımcı alanları modem tarafından yönetilecek.', 'success');
+    return true;
+  }
+
   function renderBridge(){
     var doc;
     try{doc = sourceDocument();}catch(error){setStatus('Modem sayfasına erişilemedi: ' + error.message, 'error');return;}
@@ -452,6 +623,7 @@
       return;
     }
     observeSourceDocument(doc);
+    if(renderWirelessGeneral(doc)){return;}
     panel.innerHTML = '';
     controlLinks = [];
     var forms = Array.prototype.slice.call(doc.forms || []);
