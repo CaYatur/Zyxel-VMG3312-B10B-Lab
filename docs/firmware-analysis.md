@@ -96,6 +96,22 @@ Flash device nodes present in the filesystem include:
 
 The root filesystem also contains USB, DSL, NAT, firewall, QoS, VPN, remote-management, firmware-upgrade, backup/restore, and system-monitoring pages.
 
+## Filesystem extraction
+
+The filesystem was extracted locally with CRC validation and without modifying the source image.
+
+- Regular files extracted: `1,175`
+- Directories created: `170`
+- Symbolic links recorded in the manifest: `225`
+- Special device entries recorded in the manifest: `202`
+- Extraction errors: `0`
+- Total regular-file bytes: `38,833,727`
+- Compression types used by inode fragments: uncompressed (`0`) and zlib (`6`)
+
+The stock UI contains `297` HTML/HTM files and approximately `9,832` embedded Zyxel template expressions such as `ejGet(...)`, `ejGetOther(...)`, and `ejGetML(...)`. Therefore, the extracted HTML is not a completely static application: the stock `httpd` and CMS runtime normally render values and execute CGI/CMD/WL handlers.
+
+A read-only preview server was added to render common template expressions with mock values, serve the extracted assets locally, and block every form submission. This is suitable for visual inspection and interface prototyping, not for emulating modem behavior.
+
 ## Current interpretation
 
 The firmware is suitable for controlled offline analysis and web-interface prototyping. The first test build should modify only non-critical web assets inside the JFFS2 filesystem.

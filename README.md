@@ -39,6 +39,8 @@ tools/
   zyxel_backup_config.py       Configuration backup downloader and verifier
   firmware_inspect.py          Offline firmware signature, region, and JFFS2 validator
   jffs2_path_mapper.py         Big-endian JFFS2 inode and path mapper
+  jffs2_extract.py             CRC-verified JFFS2 regular-file extractor
+  stock_ui_preview.py          Read-only local preview server for the extracted stock UI
 
 docs/
   firmware-analysis.md         Public summary of the stock AAPP7 image analysis
@@ -70,11 +72,13 @@ Completed:
 - Configuration backup
 - Offline stock firmware identity and region analysis
 - Big-endian JFFS2 validation and complete path reconstruction
+- CRC-verified root filesystem extraction
+- Read-only local preview of the extracted stock web interface
 
 Planned:
 
 - Vendor firmware header and checksum field analysis
-- Stock web-interface content extraction and comparison
+- Stock web-interface comparison and mock-data coverage expansion
 - Read-only CaYaRouter dashboard prototype
 - Lightweight API adapter for stock Zyxel services
 - Recovery workflow documentation
