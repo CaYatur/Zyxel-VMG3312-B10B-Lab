@@ -27,7 +27,10 @@ The stock web UI remains in `/webs/Brick/`. The custom files are copied to:
 ```text
 /webs/Brick/caya/index.html
 /webs/Brick/caya/full-styles.css
+/webs/Brick/caya/live-styles.css
+/webs/Brick/caya/live-modules.js
 /webs/Brick/caya/full-app.js
+/webs/Brick/caya/firmware-build.json
 ```
 
 ## Tools
@@ -51,7 +54,7 @@ It intentionally skips `createZyNandimg` and `addvtoken` full-flash workflows.
 1. Build completes without warnings or missing files.
 2. Candidate opens as big-endian JFFS2 with zero node CRC failures.
 3. `/webs/Brick/index.html` remains present.
-4. `/webs/Brick/caya/` contains the three UI assets and build marker.
+4. `/webs/Brick/caya/` contains the five UI assets and build marker.
 5. Vendor header/model/board fields match AAPP7.
 6. Candidate differs from stock only in the firmware payload region.
 7. Stock recovery image hash is rechecked.
@@ -78,9 +81,32 @@ Expected stock SHA-256:
 Only the unchanged `100AAPP7D0.bin` file is used for recovery. Full-flash/SMT
 images are excluded.
 
-## Current limitation
+## Live integration and release status
 
-The vendor host tools are Linux ELF programs. The connected Windows agent does
-not allow WSL execution, so the final binary candidate has not yet been built
-or declared flash-ready in this workspace. No custom firmware has been sent to
-the modem.
+The CaYaRouter shell maps 31 verified stock modules and 68 stock pages. A local
+same-origin gateway authenticated against the real modem and verified all 61
+safe inventory pages. It found 52 form actions; all 52 remain same-origin and
+therefore submit to the original Zyxel CGI, CMD, and WL handlers.
+
+The final local, git-ignored release candidate is:
+
+```text
+.caya-agent/build/release-ready/CaYaRouter-VMG3312-B10B-AAPP7.bin
+```
+
+Release SHA-256:
+
+```text
+41b27ea9f1e4d7db0e349cdbce7b68c75385281e66fa4be3b76d4faaba0103d2
+```
+
+The strict release guard passes every required check: zero JFFS2 CRC failures,
+1,153 files, 225 symlinks, 202 preserved special entries, an identical kernel,
+zero changed files among 1,147 common stock files, the six expected CaYaRouter
+files, and the 28 expected unrelated web assets removed to remain inside the
+stock JFFS2 partition.
+
+No custom firmware has been sent to the modem. A controlled device test still
+requires separate, explicit final approval. Passing the offline and live tests
+is not a recovery guarantee; stock recovery still depends on the bootloader and
+recovery web path remaining intact.

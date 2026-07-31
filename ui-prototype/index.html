@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <title>CaYaRouter Lab — Zyxel VMG3312-B10B</title>
   <link rel="stylesheet" href="full-styles.css">
+  <link rel="stylesheet" href="live-styles.css">
 </head>
 <body>
   <div class="app-shell">
@@ -19,7 +20,7 @@
       <div class="nav-search"><input id="menuSearch" type="search" placeholder="Özellik ara…" aria-label="Menüde ara"></div>
       <nav id="mainNav" aria-label="Yönetim menüsü"></nav>
       <div class="sidebar-footer">
-        <div class="health-row"><i class="health-dot"></i><div><strong>Modem çevrimiçi</strong><small>1.00(AAPP.7) • Demo veri katmanı</small></div></div>
+        <div class="health-row"><i class="health-dot"></i><div><strong>Modem çevrimiçi</strong><small>1.00(AAPP.7) • Canlı Zyxel modülleri</small></div></div>
       </div>
     </aside>
 
@@ -30,7 +31,7 @@
           <div><p class="eyebrow" id="pageEyebrow">Ağ özeti</p><h1 id="pageTitle">Genel Bakış</h1></div>
         </div>
         <div class="topbar-actions">
-          <div class="mode-pill"><i></i> Tam özellik demo</div>
+          <div class="mode-pill"><i></i> Canlı modem entegrasyonu</div>
           <button class="icon-button" id="themeButton" aria-label="Temayı değiştir"><span data-icon="moon"></span></button>
           <button class="profile-button" type="button"><span class="avatar">A</span><span class="profile-copy"><strong>admin</strong><small>Yönetici</small></span></button>
         </div>
@@ -38,7 +39,7 @@
 
       <div class="safety-banner" id="safetyBanner">
         <span class="banner-icon" data-icon="flask"></span>
-        <div><strong>Hazır arayüz prototipi</strong><span>Tüm normal Zyxel özellikleri ekranlarda mevcut. Değişiklikler yalnızca tarayıcıdaki demo verisine kaydedilir; gerçek modeme gönderilmez.</span></div>
+        <div><strong>Canlı Zyxel entegrasyonu</strong><span>“Canlı Modüller” içindeki stok sayfalar gerçek modem ayarlarını kullanır. Firmware, yapılandırma geri yükleme ve yeniden başlatma uçları yerel test gateway’inde kilitlidir.</span></div>
         <button id="dismissBanner" aria-label="Bildirimi kapat">×</button>
       </div>
 
@@ -56,6 +57,7 @@
     </div>
   </div>
 
+  <script src="live-modules.js"></script>
   <script src="full-app.js"></script>
 </body>
 </html>

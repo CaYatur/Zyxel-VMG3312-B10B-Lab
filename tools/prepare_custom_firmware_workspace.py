@@ -14,7 +14,13 @@ import json
 import shutil
 from pathlib import Path
 
-UI_FILES = ("index.html", "full-styles.css", "full-app.js")
+UI_FILES = (
+    "index.html",
+    "full-styles.css",
+    "live-styles.css",
+    "live-modules.js",
+    "full-app.js",
+)
 EXPECTED_MODEL = "VMG3312-B10B"
 EXPECTED_BOARD = "963168VX"
 EXPECTED_VERSION = "1.00(AAPP.7)"

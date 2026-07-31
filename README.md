@@ -41,6 +41,7 @@ tools/
   jffs2_path_mapper.py         Big-endian JFFS2 inode and path mapper
   jffs2_extract.py             CRC-verified JFFS2 regular-file extractor
   stock_ui_preview.py          Read-only local preview server for the extracted stock UI
+  caya_live_gateway.py         Authenticated same-origin gateway for real Zyxel modules
   prepare_custom_firmware_workspace.py  Adds /caya/ without replacing stock UI
   firmware_candidate_guard.py  Conservative offline custom-image checks
   build_caya_firmware_linux.sh Vendor-tool fs+kernel build recipe for Linux
@@ -52,7 +53,9 @@ docs/
 ui-prototype/
   index.html                   Full CaYaRouter Lab management shell
   full-styles.css              Responsive light/dark management interface
-  full-app.js                  Complete feature catalog and local demo data layer
+  live-styles.css              Live stock-module viewer styles
+  live-modules.js              Verified 31-module / 68-page Zyxel route catalog
+  full-app.js                  Modern navigation and live stock-module integration
   styles.css                   Earlier dashboard prototype styles
   app.js                       Earlier dashboard prototype interactions
 ```
@@ -88,14 +91,16 @@ Completed:
 - Responsive CaYaRouter Lab dashboard prototype with light/dark themes
 - Full management UI coverage for WAN/DSL, LAN/DHCP, Wi-Fi, NAT, QoS, security, parental control, IPSec, USB, monitoring, logs, diagnostics, and maintenance
 - Browser-local demo persistence for forms, switches, tables, add/edit/delete flows, filtering, and diagnostics
+- Authenticated live integration for 31 stock modules and 68 stock pages
+- Verification of all 61 safe inventory pages and 52 same-origin form actions
+- Vendor-tool firmware build with preserved kernel, symlinks, and special device entries
+- Strict release guard with zero-CRC and byte-for-byte stock tree comparison
+- Verified local stock AAPP7 recovery package
 
 Planned:
 
-- Vendor firmware header and checksum field analysis
-- Read-only live-data adapter for the CaYaRouter dashboard
-- Lightweight API adapter for stock Zyxel services
-- Recovery workflow documentation
-- Controlled test build that changes only non-critical web assets
+- Controlled device test after explicit final approval
+- Post-flash boot, stock-panel, `/caya/`, and configuration verification
 
 ## Disclaimer
 
