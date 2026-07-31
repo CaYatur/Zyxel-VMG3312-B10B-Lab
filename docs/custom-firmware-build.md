@@ -2,8 +2,9 @@
 
 ## Goal
 
-Build a VMG3312-B10B `ras.bin` candidate that keeps the original Zyxel UI at
-`/` and adds the CaYaRouter UI at `/caya/`.
+Build a VMG3312-B10B `ras.bin` candidate whose main `/index.html` and login
+screen use CaYaRouter, while the original Zyxel settings pages remain available
+as live same-origin modules.
 
 ## Confirmed base parameters
 
@@ -22,16 +23,21 @@ The custom build targets only the firmware `fs+kernel` image. It must not call
 `createZyNandimg`, create SMT/full-flash images, or include device-specific
 PSI/NVRAM, calibration, MAC, serial, CFE, or partition-table changes.
 
-The stock web UI remains in `/webs/Brick/`. The custom files are copied to:
+The stock settings pages remain under `/webs/Brick/pages/`. The main index and
+login page are intentionally replaced, and the live-only CaYaRouter assets are:
 
 ```text
-/webs/Brick/caya/index.html
-/webs/Brick/caya/full-styles.css
-/webs/Brick/caya/live-styles.css
+/webs/Brick/caya/caya-app.html
+/webs/Brick/caya/caya-app.css
+/webs/Brick/caya/caya-app.js
+/webs/Brick/caya/caya-login.css
 /webs/Brick/caya/live-modules.js
-/webs/Brick/caya/full-app.js
+/webs/Brick/caya/caya-loader.js
 /webs/Brick/caya/firmware-build.json
 ```
+
+The previous demo files (`full-app.js`, `full-styles.css`, and
+`live-styles.css`) are forbidden in release images.
 
 ## Tools
 
@@ -88,16 +94,16 @@ same-origin gateway authenticated against the real modem and verified all 61
 safe inventory pages. It found 52 form actions; all 52 remain same-origin and
 therefore submit to the original Zyxel CGI, CMD, and WL handlers.
 
-The final local, git-ignored release candidate is:
+The current corrected, git-ignored release candidate is:
 
 ```text
-.caya-agent/build/release-ready/CaYaRouter-VMG3312-B10B-AAPP7.bin
+.caya-agent/build/release-liveonly/CaYaRouter-VMG3312-B10B-AAPP7.bin
 ```
 
 Release SHA-256:
 
 ```text
-8d9b175ebe9a3074fa8f46e870e86a498f4bd108dfe5429bb2ab2b6015668a24
+a2b5a3c3e3681480ab572bb46dcbb9b4c963e94781c94d08e48970013a32264a
 ```
 
 The default management accounts are intentionally configured as requested:
@@ -111,12 +117,15 @@ The existing first-login password warning and Skip behavior remain unchanged.
 TR-069, PPPoE, and other service credentials are not modified.
 
 The strict release guard passes every required check: zero JFFS2 CRC failures,
-1,153 files, 225 symlinks, 202 preserved special entries, an identical kernel,
-one intentional changed stock file (`/etc/default.cfg`) containing only the two
-management-password replacements, the six expected CaYaRouter files, and the 28
-expected unrelated web assets removed to remain inside the stock JFFS2 partition.
+1,154 files, 225 symlinks, 202 preserved special entries, an identical kernel,
+four intentional changed stock files (`/etc/default.cfg`, the main index, the
+login page, and the authorized tab shell), seven expected CaYaRouter files, and
+28 expected unrelated web assets removed to remain inside the stock JFFS2
+partition. UI validation also proves that fake speed values, demo localStorage,
+and the previous `full-app.js` are absent.
 
-No custom firmware has been sent to the modem. A controlled device test still
-requires separate, explicit final approval. Passing the offline and live tests
-is not a recovery guarantee; stock recovery still depends on the bootloader and
-recovery web path remaining intact.
+The currently installed second firmware remains operational, but this corrected
+live-only candidate has not been sent to the modem. A third controlled device
+test requires separate, explicit final approval. Passing the offline and live
+tests is not a recovery guarantee; stock recovery still depends on the
+bootloader and recovery web path remaining intact.

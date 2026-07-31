@@ -25,15 +25,21 @@ EXPECTED_REMOVED = 28
 EXPECTED_ADDED = 7
 REQUIRED_PATHS = {
     "/webs/Brick/index.html",
-    "/webs/Brick/caya/index.html",
-    "/webs/Brick/caya/full-styles.css",
-    "/webs/Brick/caya/live-styles.css",
+    "/webs/Brick/login/login.html",
+    "/webs/Brick/caya/caya-app.html",
+    "/webs/Brick/caya/caya-app.css",
+    "/webs/Brick/caya/caya-app.js",
+    "/webs/Brick/caya/caya-login.css",
     "/webs/Brick/caya/live-modules.js",
     "/webs/Brick/caya/caya-loader.js",
-    "/webs/Brick/caya/full-app.js",
     "/webs/Brick/caya/firmware-build.json",
     "/webs/Brick/pages/tabFW/tabFW.html",
     "/vmlinux.lz",
+}
+FORBIDDEN_PATHS = {
+    "/webs/Brick/caya/full-app.js",
+    "/webs/Brick/caya/full-styles.css",
+    "/webs/Brick/caya/live-styles.css",
 }
 FORBIDDEN_MARKERS = (b"CFE CUSTOM", b"calibration override", b"partition rewrite")
 
@@ -66,11 +72,13 @@ def main() -> int:
     paths_report_path = (args.paths_report or candidate_dir / "jffs2-paths.json").resolve()
     tree_report_path = (args.tree_report or candidate_dir / "tree-comparison.json").resolve()
     paths_list_path = (args.paths_list or candidate_dir / "all-paths.txt").resolve()
+    ui_report_path = (candidate_dir / "ui-validation.json").resolve()
 
     candidate = candidate_path.read_bytes()
     stock = args.stock.read_bytes()
     paths_report = read_json(paths_report_path)
     tree_report = read_json(tree_report_path)
+    ui_report = read_json(ui_report_path)
     summary = paths_report.get("summary") if isinstance(paths_report.get("summary"), dict) else {}
     paths = {
         line.split()[-1]
@@ -110,9 +118,12 @@ def main() -> int:
         "expected_symlink_count": summary.get("symlinks") == EXPECTED_SYMLINKS,
         "expected_active_path_count": summary.get("active_paths") == EXPECTED_ACTIVE_PATHS,
         "required_paths_present": REQUIRED_PATHS.issubset(paths),
+        "forbidden_demo_paths_absent": not (FORBIDDEN_PATHS & paths),
+        "ui_validation_present": bool(ui_report),
+        "ui_validation_ok": ui_report.get("ok") is True,
         "tree_comparison_ok": tree_report.get("ok") is True,
         "only_expected_stock_files_changed": (
-            tree_report.get("changed_common_count") == 2
+            tree_report.get("changed_common_count") == 4
             and tree_report.get("expected_changed_common_files") is True
         ),
         "default_cfg_only_password_fields_changed": (
@@ -122,8 +133,15 @@ def main() -> int:
         "tabfw_only_loader_hook_changed": (
             tree_report.get("tabfw_only_loader_hook_changed") is True
         ),
-        "loader_is_query_gated": tree_report.get("loader_has_caya_gate") is True,
-        "loader_uses_caya_base": tree_report.get("loader_embeds_base") is True,
+        "main_index_redirects_to_caya": (
+            tree_report.get("main_index_redirects_to_caya") is True
+        ),
+        "custom_login_uses_stock_cgi": (
+            tree_report.get("custom_login_uses_stock_cgi") is True
+        ),
+        "custom_login_has_caya_brand": (
+            tree_report.get("custom_login_has_caya_brand") is True
+        ),
         "expected_common_file_count": tree_report.get("common_files") == EXPECTED_COMMON_FILES,
         "expected_removed_count": tree_report.get("removed_count") == EXPECTED_REMOVED,
         "expected_added_count": tree_report.get("added_count") == EXPECTED_ADDED,

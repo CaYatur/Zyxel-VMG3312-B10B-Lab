@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CaYaRouter Giriş</title>
+  <link rel="stylesheet" href="/caya/caya-login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="login-card">
+      <div class="login-brand"><span>C</span><div><strong>CaYaRouter</strong><small>VMG3312-B10B</small></div></div>
+      <div class="login-copy">
+        <small>MODEM Y&Ouml;NETİMİ</small>
+        <h1>Y&ouml;netim paneline giriş</h1>
+        <p>Bu sayfa Zyxel cihazının kendi oturum mekanizmasını kullanır. Kullanıcı adı ve parola yalnızca modeme g&ouml;nderilir.</p>
+      </div>
+      <div id="loginError" class="login-error" hidden>Kullanıcı adı veya parola hatalı.</div>
+      <form action="/login/login-page.cgi" method="post" autocomplete="on">
+        <label>Kullanıcı adı<input name="AuthName" id="AuthName" type="text" maxlength="256" autocomplete="username" required autofocus></label>
+        <label>Parola<input name="AuthPassword" id="AuthPassword" type="password" maxlength="256" autocomplete="current-password" required></label>
+        <button type="submit">Giriş yap</button>
+      </form>
+      <footer>CaYaRouter Lab &middot; Zyxel VMG3312-B10B</footer>
+    </section>
+  </main>
+  <script>
+    (function(){
+      var status = '<%ejGet(loginStatus)%>';
+      if(status && status !== '0'){
+        document.getElementById('loginError').hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>

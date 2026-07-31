@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CaYaRouter</title>
+  <link rel="stylesheet" href="/caya/caya-app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">C</span><div><strong>CaYaRouter</strong><small>VMG3312-B10B</small></div></div>
+      <label class="search"><span>Ara</span><input id="moduleSearch" type="search" placeholder="Ayar veya mod&uuml;l ara"></label>
+      <nav id="mainNav" aria-label="Ana men&uuml;"></nav>
+      <div class="sidebar-footer">
+        <a class="stock-link" href="/pages/connectionStatus/naviView_partialLoad.html" target="moduleFrame">Stok durum sayfası</a>
+        <button id="logoutButton" class="logout-button" type="button">&Ccedil;ıkış yap</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div><small>CANLI MODEM Y&Ouml;NETİMİ</small><h1 id="pageTitle">Genel Bakış</h1></div>
+        <div class="top-actions"><span class="live-badge">Ger&ccedil;ek Zyxel sayfaları</span><button id="reloadButton" type="button">Yenile</button></div>
+      </header>
+
+      <section class="notice">
+        Bu aray&uuml;z sahte hız, cihaz sayısı veya bağlantı istatistiği &uuml;retmez. Aşağıdaki i&ccedil;erik doğrudan modemin kendi sayfalarından gelir ve Kaydet/Uygula işlemleri ger&ccedil;ek cihaza uygulanır.
+      </section>
+
+      <section id="moduleCatalog" class="catalog" hidden></section>
+
+      <section id="viewer" class="viewer">
+        <div class="viewer-head"><div><small>CANLI MOD&Uuml;L</small><strong id="viewerTitle">Ağ Haritası ve Durum</strong></div><span id="viewerPath"></span></div>
+        <iframe id="moduleFrame" name="moduleFrame" title="Canlı modem ayarları" src="/pages/connectionStatus/naviView_partialLoad.html"></iframe>
+      </section>
+    </main>
+  </div>
+  <script src="/caya/live-modules.js"></script>
+  <script src="/caya/caya-app.js"></script>
+</body>
+</html>

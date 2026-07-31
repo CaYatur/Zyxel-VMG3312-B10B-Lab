@@ -58,30 +58,27 @@ def set_default_account_passwords(config_path: Path) -> list[str]:
     return changed
 
 
-def install_caya_loader(index_path: Path, caya_dir: Path, tabfw_path: Path) -> None:
-    """Expose CaYaRouter through the already-authorized stock tabFW page."""
-    shell = index_path.read_text(encoding="utf-8", errors="strict")
-    shell, count = re.subn(
-        r"<head>",
-        '<head>\n  <base href="/caya/">',
-        shell,
-        count=1,
-        flags=re.IGNORECASE,
-    )
-    if count != 1:
-        raise RuntimeError(f"Unable to insert base URL into {index_path}")
-
+def install_caya_shell(
+    shell_path: Path,
+    caya_dir: Path,
+    tabfw_path: Path,
+    root_index_path: Path,
+    login_source_path: Path,
+    login_target_path: Path,
+) -> None:
+    """Install the live-only CaYaRouter shell on authorized stock entry points."""
+    shell = shell_path.read_text(encoding="utf-8", errors="strict")
     loader = (
         "(function(){\n"
         "  if(!/(?:^|[?&])caya=1(?:&|$)/.test(window.location.search)){return;}\n"
-        f"  var page={json.dumps(shell, ensure_ascii=False)};\n"
+        f"  var page={json.dumps(shell, ensure_ascii=True)};\n"
         "  document.open();\n"
         "  document.write(page);\n"
         "  document.close();\n"
         "})();\n"
     )
     loader_path = caya_dir / "caya-loader.js"
-    loader_path.write_text(loader, encoding="utf-8")
+    loader_path.write_text(loader, encoding="utf-8-sig", newline="")
     os.chmod(loader_path, 0o644)
 
     tabfw = tabfw_path.read_text(encoding="utf-8", errors="strict")
@@ -97,6 +94,21 @@ def install_caya_loader(index_path: Path, caya_dir: Path, tabfw_path: Path) -> N
         if count != 1:
             raise RuntimeError(f"Unable to patch {tabfw_path}")
         tabfw_path.write_text(tabfw, encoding="utf-8", newline="")
+
+    root_index_path.write_text(
+        "<!doctype html><html><head><meta charset=\"utf-8\">"
+        "<meta http-equiv=\"refresh\" content=\"0;url=/pages/tabFW/tabFW.html?caya=1\">"
+        "<script>location.replace('/pages/tabFW/tabFW.html?caya=1');</script>"
+        "</head><body></body></html>\n",
+        encoding="ascii",
+        newline="",
+    )
+
+    login_target_path.write_text(
+        login_source_path.read_text(encoding="utf-8", errors="strict"),
+        encoding="utf-8-sig",
+        newline="",
+    )
 
 
 def main() -> int:
@@ -162,20 +174,33 @@ def main() -> int:
     caya_dir = output / "webs" / "Brick" / "caya"
     caya_dir.mkdir(parents=True, exist_ok=True)
     ui_files = (
-        "index.html",
-        "full-styles.css",
-        "live-styles.css",
+        "caya-app.html",
+        "caya-app.css",
+        "caya-app.js",
+        "caya-login.css",
         "live-modules.js",
-        "full-app.js",
     )
     for name in ui_files:
-        shutil.copy2(args.ui / name, caya_dir / name)
-        os.chmod(caya_dir / name, 0o644)
+        source_file = args.ui / name
+        target_file = caya_dir / name
+        if name.endswith(".js"):
+            target_file.write_text(
+                source_file.read_text(encoding="utf-8", errors="strict"),
+                encoding="utf-8-sig",
+                newline="",
+            )
+        else:
+            shutil.copy2(source_file, target_file)
+        os.chmod(target_file, 0o644)
 
-    install_caya_loader(
-        args.ui / "index.html",
+    brick = output / "webs" / "Brick"
+    install_caya_shell(
+        args.ui / "caya-app.html",
         caya_dir,
-        output / "webs" / "Brick" / "pages" / "tabFW" / "tabFW.html",
+        brick / "pages" / "tabFW" / "tabFW.html",
+        brick / "index.html",
+        args.ui / "caya-login.html",
+        brick / "login" / "login.html",
     )
 
     (caya_dir / "firmware-build.json").write_text(
@@ -185,8 +210,9 @@ def main() -> int:
                 "model": "VMG3312-B10B",
                 "board": "963168VX",
                 "base_firmware": "1.00(AAPP.7)",
-                "path": "/pages/tabFW/tabFW.html?caya=1",
-                "stock_ui_preserved": True,
+                "path": "/index.html",
+                "stock_settings_pages_preserved": True,
+                "main_ui": "CaYaRouter live-only shell",
             },
             indent=2,
         ),
@@ -221,7 +247,12 @@ def main() -> int:
         "device_table": str(args.device_table.resolve()),
         "default_password_accounts": default_password_accounts,
         "pruned_web_assets": pruned,
-        "stock_ui_preserved": (output / "webs" / "Brick" / "index.html").is_file(),
+        "main_index_redirects_to_caya": "caya=1" in (
+            output / "webs" / "Brick" / "index.html"
+        ).read_text(encoding="ascii", errors="strict"),
+        "custom_login_installed": "CaYaRouter" in (
+            output / "webs" / "Brick" / "login" / "login.html"
+        ).read_text(encoding="utf-8-sig", errors="strict"),
         "caya_ui_present": all((caya_dir / name).is_file() for name in ui_files),
         "caya_loader_present": (caya_dir / "caya-loader.js").is_file(),
         "tabfw_loader_hook_present": "/caya/caya-loader.js" in (
