@@ -23,6 +23,9 @@
   var activePageIndex = 0;
   var controlLinks = [];
   var bridgePollToken = 0;
+  var bridgeObserver = null;
+  var bridgeObservedDocument = null;
+  var bridgeRenderTimer = 0;
 
   var overview = {
     id: 'overview',
@@ -106,6 +109,9 @@
     panel.innerHTML = '';
     controlLinks = [];
     bridgePollToken += 1;
+    if(bridgeObserver){bridgeObserver.disconnect();bridgeObserver = null;}
+    bridgeObservedDocument = null;
+    if(bridgeRenderTimer){window.clearTimeout(bridgeRenderTimer);bridgeRenderTimer = 0;}
     setStatus('Modemden canlı ayarlar okunuyor…');
     bridge.src = bridgeUrl + (bridgeUrl.indexOf('?') >= 0 ? '&' : '?') + '_cayaBridge=' + Date.now();
   }
@@ -275,6 +281,13 @@
     return proxy;
   }
 
+  function isRenderableTable(source){
+    if(!source){return false;}
+    var rows = source.querySelectorAll('tr');
+    if(!rows.length){return false;}
+    return Boolean(source.querySelector('th') || rows.length > 1 || source.querySelector('td'));
+  }
+
   function renderTable(source){
     var wrap = document.createElement('div');
     wrap.className = 'native-table-wrap';
@@ -318,9 +331,7 @@
     heading.textContent = legend && clean(legend.textContent) ? clean(legend.textContent) : ('Ayar Grubu ' + (index + 1));
     card.appendChild(heading);
 
-    var formTables = Array.prototype.slice.call(form.querySelectorAll('table')).filter(function(table){
-      return table.querySelectorAll('tr').length > 1;
-    });
+    var formTables = Array.prototype.slice.call(form.querySelectorAll('table')).filter(isRenderableTable);
     formTables.slice(0, 12).forEach(function(table){
       card.appendChild(renderTable(table));
     });
@@ -348,6 +359,49 @@
     if(actions.children.length){card.appendChild(actions);}
     if(!formTables.length && !grid.children.length && !actions.children.length){return null;}
     return card;
+  }
+
+  function renderStandaloneActions(doc){
+    var root = doc.querySelector('#contentPanel') || doc.body;
+    var sources = Array.prototype.slice.call(root.querySelectorAll('a[onclick],button,input[type=button],input[type=submit],input[type=image]')).filter(function(source){
+      if(source.closest('form') || source.closest('table')){return false;}
+      if(source.disabled || source.getAttribute('aria-disabled') === 'true'){return false;}
+      var label = tableActionLabel(source);
+      if(!label || /close|kapat|yenile|refresh/i.test(label)){return false;}
+      try{
+        var style = doc.defaultView && doc.defaultView.getComputedStyle ? doc.defaultView.getComputedStyle(source) : null;
+        if(style && (style.display === 'none' || style.visibility === 'hidden')){return false;}
+      }catch(ignore){}
+      return true;
+    });
+    if(!sources.length){return null;}
+
+    var card = document.createElement('section');
+    card.className = 'native-card';
+    var heading = document.createElement('h2');
+    heading.textContent = 'İşlemler';
+    card.appendChild(heading);
+    var actions = document.createElement('div');
+    actions.className = 'native-actions';
+    sources.forEach(function(source){actions.appendChild(tableActionButton(source));});
+    card.appendChild(actions);
+    return card;
+  }
+
+  function observeSourceDocument(doc){
+    if(!doc || bridgeObservedDocument === doc){return;}
+    if(bridgeObserver){bridgeObserver.disconnect();}
+    bridgeObservedDocument = doc;
+    var target = doc.querySelector('#contentPanel') || doc.body;
+    if(!target || !window.MutationObserver){return;}
+    bridgeObserver = new MutationObserver(function(){
+      if(bridgeRenderTimer){window.clearTimeout(bridgeRenderTimer);}
+      bridgeRenderTimer = window.setTimeout(function(){
+        bridgeRenderTimer = 0;
+        renderBridge();
+      }, 260);
+    });
+    bridgeObserver.observe(target, {childList:true, subtree:true, attributes:true, characterData:true});
   }
 
   function sourceDocument(){
@@ -397,6 +451,7 @@
       window.top.location.href = '/login/login.html';
       return;
     }
+    observeSourceDocument(doc);
     panel.innerHTML = '';
     controlLinks = [];
     var forms = Array.prototype.slice.call(doc.forms || []);
@@ -405,15 +460,29 @@
       var rendered = renderForm(form, doc, index);
       if(rendered){panel.appendChild(rendered);renderedForms += 1;}
     });
-    var tables = Array.prototype.slice.call(doc.querySelectorAll('table')).filter(function(table){return table.querySelectorAll('tr').length > 1 && !table.closest('form');});
-    tables.slice(0, 12).forEach(function(table){
-      var card = document.createElement('section');card.className = 'native-card';card.appendChild(renderTable(table));panel.appendChild(card);
+    var tables = Array.prototype.slice.call(doc.querySelectorAll('table')).filter(function(table){
+      return isRenderableTable(table) && !table.closest('form') && !(table.parentElement && table.parentElement.closest('table'));
     });
-    if(!renderedForms && !tables.length){
-      var info = document.createElement('section');info.className = 'native-card';
-      var text = document.createElement('div');text.className = 'native-info';text.textContent = bodyText || 'Bu modül görüntülenebilir veri döndürmedi.';info.appendChild(text);panel.appendChild(info);
+    tables.slice(0, 12).forEach(function(table){
+      var card = document.createElement('section');
+      card.className = 'native-card';
+      card.appendChild(renderTable(table));
+      panel.appendChild(card);
+    });
+
+    var actionCard = renderStandaloneActions(doc);
+    if(actionCard){panel.insertBefore(actionCard, panel.firstChild);}
+
+    if(!renderedForms && !tables.length && !actionCard){
+      var info = document.createElement('section');
+      info.className = 'native-card';
+      var text = document.createElement('div');
+      text.className = 'native-info';
+      text.textContent = bodyText ? bodyText.slice(0, 1200) : 'Bu modül henüz dönüştürülebilir veri döndürmedi.';
+      info.appendChild(text);
+      panel.appendChild(info);
     }
-    setStatus(renderedForms + ' ayar grubu ve ' + tables.length + ' bağımsız bilgi tablosu canlı cihazdan yüklendi.', 'success');
+    setStatus(renderedForms + ' ayar grubu, ' + tables.length + ' bilgi tablosu ve ' + (actionCard ? '1' : '0') + ' işlem grubu canlı cihazdan yüklendi.', 'success');
   }
 
   bridge.addEventListener('load', function(){
