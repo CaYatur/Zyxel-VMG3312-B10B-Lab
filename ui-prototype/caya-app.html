@@ -11,7 +11,10 @@
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark">C</span><div><strong>CaYaRouter</strong><small>VMG3312-B10B</small></div></div>
       <label class="search"><span>Ara</span><input id="moduleSearch" type="search" placeholder="Ayar veya modül ara"></label>
-      <nav id="mainNav" aria-label="Ana menü"></nav>
+      <div class="sidebar-navigation">
+        <nav id="mainNav" aria-label="Ana menü"></nav>
+        <div id="pageTabs" class="page-tabs" aria-label="Modül alt sayfaları"></div>
+      </div>
       <div class="sidebar-footer">
         <button id="logoutButton" class="logout-button" type="button">Çıkış yap</button>
       </div>
@@ -34,7 +37,6 @@
           <div><small>YEREL AYAR EKRANI</small><strong id="viewerTitle">Genel Bakış</strong></div>
           <span id="viewerPath"></span>
         </div>
-        <div id="pageTabs" class="page-tabs"></div>
         <div id="statusBar" class="status-bar" role="status">Modem verisi yükleniyor…</div>
         <div id="nativePanel" class="native-panel"></div>
       </section>

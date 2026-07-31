@@ -74,8 +74,12 @@
   }
 
   function buildPageTabs(module){
+    var pages = pageList(module);
     tabs.innerHTML = '';
-    pageList(module).forEach(function(page, index){
+    tabs.classList.toggle('has-pages', pages.length > 1);
+    var activeButton = nav.querySelector('.nav-button.active');
+    if(activeButton){activeButton.insertAdjacentElement('afterend', tabs);}
+    pages.forEach(function(page, index){
       var button = document.createElement('button');
       button.type = 'button';
       button.className = 'page-tab';
