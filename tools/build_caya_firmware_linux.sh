@@ -32,6 +32,7 @@ required=(
   "$TARGET_FS/webs/Brick/caya/full-styles.css"
   "$TARGET_FS/webs/Brick/caya/live-styles.css"
   "$TARGET_FS/webs/Brick/caya/live-modules.js"
+  "$TARGET_FS/webs/Brick/caya/caya-loader.js"
   "$TARGET_FS/webs/Brick/caya/full-app.js"
   "$PROFILE/vmlinux.lz"
   "$ROOT/targets/cfe/cfe63268nand128.bin"

@@ -17,20 +17,22 @@ STOCK_SHA256 = "407fef65a84ae6fce1cfcfc5ef03c298abe6503b998930d32da9a02b4f108898
 JFFS2_OFFSET = 0x20000
 JFFS2_END = 0x1100000
 EXPECTED_PREFIX = bytes.fromhex("360000004d5354435f343030650034303065")
-EXPECTED_FILES = 1153
+EXPECTED_FILES = 1154
 EXPECTED_SYMLINKS = 225
-EXPECTED_ACTIVE_PATHS = 1737
+EXPECTED_ACTIVE_PATHS = 1738
 EXPECTED_COMMON_FILES = 1147
 EXPECTED_REMOVED = 28
-EXPECTED_ADDED = 6
+EXPECTED_ADDED = 7
 REQUIRED_PATHS = {
     "/webs/Brick/index.html",
     "/webs/Brick/caya/index.html",
     "/webs/Brick/caya/full-styles.css",
     "/webs/Brick/caya/live-styles.css",
     "/webs/Brick/caya/live-modules.js",
+    "/webs/Brick/caya/caya-loader.js",
     "/webs/Brick/caya/full-app.js",
     "/webs/Brick/caya/firmware-build.json",
+    "/webs/Brick/pages/tabFW/tabFW.html",
     "/vmlinux.lz",
 }
 FORBIDDEN_MARKERS = (b"CFE CUSTOM", b"calibration override", b"partition rewrite")
@@ -109,14 +111,19 @@ def main() -> int:
         "expected_active_path_count": summary.get("active_paths") == EXPECTED_ACTIVE_PATHS,
         "required_paths_present": REQUIRED_PATHS.issubset(paths),
         "tree_comparison_ok": tree_report.get("ok") is True,
-        "only_default_cfg_changed": (
-            tree_report.get("changed_common_count") == 1
-            and tree_report.get("only_expected_common_file_changed") is True
+        "only_expected_stock_files_changed": (
+            tree_report.get("changed_common_count") == 2
+            and tree_report.get("expected_changed_common_files") is True
         ),
         "default_cfg_only_password_fields_changed": (
             tree_report.get("default_cfg_only_password_fields_changed") is True
         ),
         "admin_root_default_to_1234": tree_report.get("admin_root_are_1234") is True,
+        "tabfw_only_loader_hook_changed": (
+            tree_report.get("tabfw_only_loader_hook_changed") is True
+        ),
+        "loader_is_query_gated": tree_report.get("loader_has_caya_gate") is True,
+        "loader_uses_caya_base": tree_report.get("loader_embeds_base") is True,
         "expected_common_file_count": tree_report.get("common_files") == EXPECTED_COMMON_FILES,
         "expected_removed_count": tree_report.get("removed_count") == EXPECTED_REMOVED,
         "expected_added_count": tree_report.get("added_count") == EXPECTED_ADDED,

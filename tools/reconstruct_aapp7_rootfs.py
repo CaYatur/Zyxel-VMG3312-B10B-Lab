@@ -58,6 +58,47 @@ def set_default_account_passwords(config_path: Path) -> list[str]:
     return changed
 
 
+def install_caya_loader(index_path: Path, caya_dir: Path, tabfw_path: Path) -> None:
+    """Expose CaYaRouter through the already-authorized stock tabFW page."""
+    shell = index_path.read_text(encoding="utf-8", errors="strict")
+    shell, count = re.subn(
+        r"<head>",
+        '<head>\n  <base href="/caya/">',
+        shell,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+    if count != 1:
+        raise RuntimeError(f"Unable to insert base URL into {index_path}")
+
+    loader = (
+        "(function(){\n"
+        "  if(!/(?:^|[?&])caya=1(?:&|$)/.test(window.location.search)){return;}\n"
+        f"  var page={json.dumps(shell, ensure_ascii=False)};\n"
+        "  document.open();\n"
+        "  document.write(page);\n"
+        "  document.close();\n"
+        "})();\n"
+    )
+    loader_path = caya_dir / "caya-loader.js"
+    loader_path.write_text(loader, encoding="utf-8")
+    os.chmod(loader_path, 0o644)
+
+    tabfw = tabfw_path.read_text(encoding="utf-8", errors="strict")
+    marker = '<script src="/caya/caya-loader.js" type="text/javascript"></script>'
+    if marker not in tabfw:
+        tabfw, count = re.subn(
+            r"</body>",
+            marker + "\n</body>",
+            tabfw,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+        if count != 1:
+            raise RuntimeError(f"Unable to patch {tabfw_path}")
+        tabfw_path.write_text(tabfw, encoding="utf-8", newline="")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--extracted", type=Path, required=True)
@@ -130,6 +171,13 @@ def main() -> int:
     for name in ui_files:
         shutil.copy2(args.ui / name, caya_dir / name)
         os.chmod(caya_dir / name, 0o644)
+
+    install_caya_loader(
+        args.ui / "index.html",
+        caya_dir,
+        output / "webs" / "Brick" / "pages" / "tabFW" / "tabFW.html",
+    )
+
     (caya_dir / "firmware-build.json").write_text(
         json.dumps(
             {
@@ -137,7 +185,7 @@ def main() -> int:
                 "model": "VMG3312-B10B",
                 "board": "963168VX",
                 "base_firmware": "1.00(AAPP.7)",
-                "path": "/caya/",
+                "path": "/pages/tabFW/tabFW.html?caya=1",
                 "stock_ui_preserved": True,
             },
             indent=2,
@@ -175,6 +223,10 @@ def main() -> int:
         "pruned_web_assets": pruned,
         "stock_ui_preserved": (output / "webs" / "Brick" / "index.html").is_file(),
         "caya_ui_present": all((caya_dir / name).is_file() for name in ui_files),
+        "caya_loader_present": (caya_dir / "caya-loader.js").is_file(),
+        "tabfw_loader_hook_present": "/caya/caya-loader.js" in (
+            output / "webs" / "Brick" / "pages" / "tabFW" / "tabFW.html"
+        ).read_text(encoding="utf-8", errors="strict"),
     }
     print(json.dumps(report, indent=2))
     return 0
