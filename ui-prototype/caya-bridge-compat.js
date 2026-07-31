@@ -20,19 +20,31 @@
     var separator = rawUrl.indexOf(' ');
     var urlPart = separator >= 0 ? rawUrl.slice(0, separator) : rawUrl;
     var selectorPart = separator >= 0 ? rawUrl.slice(separator) : '';
-    if(/^(?:[a-z]+:)?\/\//i.test(urlPart) || urlPart.charAt(0) === '/' || urlPart.charAt(0) === '#'){
+    if(/^(?:[a-z]+:)?\/\//i.test(urlPart) || urlPart.charAt(0) === '#'){
       return urlPart + selectorPart;
     }
-    if(/^pages\//i.test(urlPart)){
-      return '/' + urlPart + selectorPart;
+
+    var resolved;
+    var rootedPages = urlPart.match(/(?:^|\/)(pages\/.*)$/i);
+    if(urlPart.charAt(0) === '/'){
+      resolved = urlPart;
+    }else if(rootedPages){
+      resolved = '/' + rootedPages[1];
+    }else{
+      var base = window.CAYA_BRIDGE_BASE || '/pages/';
+      try{
+        var absolute = new URL(urlPart, window.location.origin + base);
+        resolved = absolute.pathname + absolute.search + absolute.hash;
+      }catch(error){
+        resolved = urlPart;
+      }
     }
-    var base = window.CAYA_BRIDGE_BASE || '/pages/';
-    try{
-      var resolved = new URL(urlPart, window.location.origin + base);
-      return resolved.pathname + resolved.search + resolved.hash + selectorPart;
-    }catch(error){
-      return urlPart + selectorPart;
-    }
+
+    var aliases = {
+      '/pages/network/routing/staticRouteAdd.html':'/pages/network/routing/static_add.html'
+    };
+    resolved = aliases[resolved] || resolved;
+    return resolved + selectorPart;
   }
 
   if(jq.fn && jq.fn.load && !jq.fn.load.cayaWrapped){
