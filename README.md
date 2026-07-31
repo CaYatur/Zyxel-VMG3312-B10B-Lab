@@ -37,6 +37,11 @@ tools/
   zyxel_endpoint_mapper.py     JavaScript and dynamic endpoint mapper
   zyxel_tab_mapper.py          Zyxel menu/tab tree mapper
   zyxel_backup_config.py       Configuration backup downloader and verifier
+  firmware_inspect.py          Offline firmware signature, region, and JFFS2 validator
+  jffs2_path_mapper.py         Big-endian JFFS2 inode and path mapper
+
+docs/
+  firmware-analysis.md         Public summary of the stock AAPP7 image analysis
 ```
 
 Generated modem reports, authenticated captures, credentials, configuration backups, raw firmware images, and other sensitive device data are intentionally excluded from Git.
@@ -63,11 +68,13 @@ Completed:
 - Feature inventory
 - Local encrypted credential storage
 - Configuration backup
+- Offline stock firmware identity and region analysis
+- Big-endian JFFS2 validation and complete path reconstruction
 
 Planned:
 
-- Firmware header and checksum analysis
-- Stock web-interface extraction and comparison
+- Vendor firmware header and checksum field analysis
+- Stock web-interface content extraction and comparison
 - Read-only CaYaRouter dashboard prototype
 - Lightweight API adapter for stock Zyxel services
 - Recovery workflow documentation

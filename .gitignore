@@ -7,16 +7,13 @@ __pycache__/
 .venv/
 venv/
 
-# Modem backups, firmware images and raw authenticated captures
+# Modem backups, firmware images and generated/raw research artifacts
 *.conf
 *.bin
 *.img
 *.rom
 *.dump
-research/index_authenticated.html
-research/zyxel_*.json
-research/menu.json
-research/jsonParser.js
+research/
 
 # Local logs and temporary files
 *.log
