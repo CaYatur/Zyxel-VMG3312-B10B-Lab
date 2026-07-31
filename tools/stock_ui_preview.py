@@ -68,17 +68,26 @@ def render_expression(expression: str) -> str:
     return "0"
 
 
-def transform_html(data: bytes) -> bytes:
+def transform_html(data: bytes, request_path: str) -> bytes:
     text = data.decode("iso-8859-1", "replace")
     text = TEMPLATE_RE.sub(lambda match: render_expression(match.group(1)), text)
-    text = FORM_ACTION_RE.sub(r"\1\2/__preview_blocked__\4", text)
+
+    is_login_page = request_path == "/login/login.html"
+    form_target = "/__preview_login__" if is_login_page else "/__preview_blocked__"
+    text = FORM_ACTION_RE.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}{form_target}{match.group(4)}",
+        text,
+    )
 
     notice = """
 <div id="caya-preview-banner" style="position:fixed;z-index:999999;left:0;right:0;bottom:0;padding:8px 12px;background:#fff3cd;color:#664d03;border-top:1px solid #ffecb5;font:13px Arial,sans-serif;text-align:center">
-CaYaRouter Lab offline preview — forms and configuration changes are disabled.
+CaYaRouter Lab offline preview — login is simulated; configuration changes are disabled.
 </div>
 <script>
 document.addEventListener('submit', function (event) {
+  if (window.location.pathname === '/login/login.html') {
+    return;
+  }
   event.preventDefault();
   alert('Offline preview: configuration changes are disabled.');
 }, true);
@@ -138,7 +147,7 @@ class PreviewHandler(BaseHTTPRequestHandler):
         data = target.read_bytes()
         suffix = target.suffix.lower()
         if suffix in {".html", ".htm"}:
-            data = transform_html(data)
+            data = transform_html(data, parsed.path)
             content_type = "text/html; charset=utf-8"
         else:
             content_type = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
@@ -155,6 +164,19 @@ class PreviewHandler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_POST(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path == "/__preview_login__":
+            content_length = int(self.headers.get("Content-Length", "0") or "0")
+            if content_length > 65536:
+                self.send_error(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, "Preview form is too large")
+                return
+            if content_length:
+                self.rfile.read(content_length)
+            self.send_response(HTTPStatus.SEE_OTHER)
+            self.send_header("Location", "/index.html")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            return
         self.send_error(HTTPStatus.METHOD_NOT_ALLOWED, "Offline preview is read-only")
 
     def do_PUT(self) -> None:
