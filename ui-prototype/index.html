@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>CaYaRouter Lab — Zyxel VMG3312-B10B</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M10 31h28v7H10zM14 27a14 14 0 0 1 20 0M19 22a7 7 0 0 1 10 0M24 16h.01"/></svg>
+        </div>
+        <div>
+          <strong>CaYaRouter Lab</strong>
+          <span>VMG3312-B10B</span>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="Ana menü">
+        <button class="nav-item active" data-page="overview">
+          <span class="nav-icon" data-icon="dashboard"></span>
+          <span>Genel Bakış</span>
+        </button>
+        <button class="nav-item" data-page="internet">
+          <span class="nav-icon" data-icon="globe"></span>
+          <span>İnternet</span>
+        </button>
+        <button class="nav-item" data-page="wifi">
+          <span class="nav-icon" data-icon="wifi"></span>
+          <span>Wi‑Fi</span>
+        </button>
+        <button class="nav-item" data-page="devices">
+          <span class="nav-icon" data-icon="devices"></span>
+          <span>Bağlı Cihazlar</span>
+          <span class="nav-count">6</span>
+        </button>
+        <button class="nav-item" data-page="security">
+          <span class="nav-icon" data-icon="shield"></span>
+          <span>Güvenlik</span>
+        </button>
+        <button class="nav-item" data-page="system">
+          <span class="nav-icon" data-icon="settings"></span>
+          <span>Sistem</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="device-health">
+          <span class="status-dot online"></span>
+          <div>
+            <strong>Modem çevrimiçi</strong>
+            <span>1.00(AAPP.7)</span>
+          </div>
+        </div>
+        <p>Deneysel yerel prototip</p>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button mobile-only" id="menuButton" aria-label="Menüyü aç">
+            <span data-icon="menu"></span>
+          </button>
+          <div>
+            <p class="eyebrow" id="pageEyebrow">Ağ özeti</p>
+            <h1 id="pageTitle">Genel Bakış</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="live-pill"><span></span> Canlı demo</div>
+          <button class="icon-button" id="themeButton" aria-label="Temayı değiştir"><span data-icon="moon"></span></button>
+          <button class="profile-button" aria-label="Hesap menüsü">
+            <span class="avatar">A</span>
+            <span class="profile-copy"><strong>admin</strong><small>Yönetici</small></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="demo-banner">
+        <span data-icon="flask"></span>
+        <div><strong>Prototip modu</strong><span>Bu ekrandaki değerler örnektir. Henüz modeme ayar gönderilmez.</span></div>
+        <button id="dismissBanner" aria-label="Bildirimi kapat">×</button>
+      </div>
+
+      <section class="page active" id="page-overview" data-title="Genel Bakış" data-eyebrow="Ağ özeti">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <span class="hero-kicker"><span class="status-dot online"></span> İnternet bağlantısı aktif</span>
+            <h2>Evinizdeki ağ sağlıklı görünüyor.</h2>
+            <p>DSL hattı kararlı, Wi‑Fi açık ve 6 cihaz bağlı. Son yeniden başlatmadan beri kritik hata algılanmadı.</p>
+            <div class="hero-actions">
+              <button class="primary-button" data-page-link="internet">Bağlantı ayrıntıları</button>
+              <button class="secondary-button" id="refreshOverview"><span data-icon="refresh"></span> Yenile</button>
+            </div>
+          </div>
+          <div class="speed-ring" aria-label="İndirme hızı 74 megabit">
+            <svg viewBox="0 0 160 160" role="img">
+              <circle class="ring-track" cx="80" cy="80" r="64"></circle>
+              <circle class="ring-value" cx="80" cy="80" r="64"></circle>
+            </svg>
+            <div><strong>74.2</strong><span>Mbps</span><small>İndirme</small></div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-icon blue"><span data-icon="download"></span></div>
+            <div><span>İndirme</span><strong>74.2 Mbps</strong><small>Hat kapasitesi %82</small></div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon violet"><span data-icon="upload"></span></div>
+            <div><span>Yükleme</span><strong>8.1 Mbps</strong><small>Hat kapasitesi %76</small></div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon green"><span data-icon="wifi"></span></div>
+            <div><span>Wi‑Fi</span><strong>Açık</strong><small>2.4 GHz • Kanal 6</small></div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon amber"><span data-icon="devices"></span></div>
+            <div><span>Bağlı cihaz</span><strong>6</strong><small>5 kablosuz • 1 kablolu</small></div>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <article class="panel network-panel">
+            <div class="panel-header">
+              <div><span class="panel-kicker">Topoloji</span><h3>Ağ haritası</h3></div>
+              <button class="text-button" data-page-link="devices">Tümünü gör</button>
+            </div>
+            <div class="network-map">
+              <div class="network-node internet-node"><span data-icon="globe"></span><strong>İnternet</strong><small>Bağlı</small></div>
+              <div class="network-line line-one"></div>
+              <div class="network-node router-node"><span data-icon="router"></span><strong>VMG3312-B10B</strong><small>192.168.1.1</small></div>
+              <div class="network-line line-two"></div>
+              <div class="client-cluster">
+                <div class="client-bubble"><span data-icon="laptop"></span><small>3</small></div>
+                <div class="client-bubble"><span data-icon="phone"></span><small>2</small></div>
+                <div class="client-bubble"><span data-icon="tv"></span><small>1</small></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel activity-panel">
+            <div class="panel-header">
+              <div><span class="panel-kicker">Son 24 saat</span><h3>Ağ trafiği</h3></div>
+              <select aria-label="Trafik süresi"><option>24 saat</option><option>7 gün</option></select>
+            </div>
+            <div class="traffic-summary"><span><i class="legend download"></i> İndirme <strong>18.4 GB</strong></span><span><i class="legend upload"></i> Yükleme <strong>2.1 GB</strong></span></div>
+            <div class="traffic-chart" aria-label="Örnek trafik grafiği">
+              <svg viewBox="0 0 620 190" preserveAspectRatio="none">
+                <defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".3"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>
+                <g class="grid-lines"><path d="M0 25H620M0 75H620M0 125H620M0 175H620"/></g>
+                <path class="chart-area" d="M0 150 C60 140,80 80,135 100 S220 150,275 105 S360 40,415 75 S510 145,620 55 L620 190 L0 190 Z"/>
+                <path class="chart-line" d="M0 150 C60 140,80 80,135 100 S220 150,275 105 S360 40,415 75 S510 145,620 55"/>
+              </svg>
+              <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Şimdi</span></div>
+            </div>
+          </article>
+        </div>
+
+        <article class="panel devices-preview">
+          <div class="panel-header">
+            <div><span class="panel-kicker">Yerel ağ</span><h3>Son etkin cihazlar</h3></div>
+            <button class="text-button" data-page-link="devices">Cihazları yönet</button>
+          </div>
+          <div class="device-list" id="overviewDeviceList"></div>
+        </article>
+      </section>
+
+      <section class="page" id="page-internet" data-title="İnternet" data-eyebrow="WAN ve DSL">
+        <div class="section-grid two-columns">
+          <article class="panel detail-card">
+            <div class="panel-header"><div><span class="panel-kicker">WAN durumu</span><h3>İnternet bağlantısı</h3></div><span class="badge success">Bağlı</span></div>
+            <dl class="detail-list">
+              <div><dt>Bağlantı türü</dt><dd>PPPoE</dd></div>
+              <div><dt>IPv4 adresi</dt><dd>100.72.18.42</dd></div>
+              <div><dt>DNS</dt><dd>Otomatik</dd></div>
+              <div><dt>Çalışma süresi</dt><dd>2 saat 18 dakika</dd></div>
+            </dl>
+          </article>
+          <article class="panel detail-card">
+            <div class="panel-header"><div><span class="panel-kicker">DSL hattı</span><h3>Hat değerleri</h3></div><span class="badge success">Kararlı</span></div>
+            <dl class="detail-list">
+              <div><dt>Mod</dt><dd>VDSL2 17a</dd></div>
+              <div><dt>SNR</dt><dd>10.8 / 12.1 dB</dd></div>
+              <div><dt>Hat zayıflaması</dt><dd>8.4 / 3.1 dB</dd></div>
+              <div><dt>CRC hatası</dt><dd>0</dd></div>
+            </dl>
+          </article>
+        </div>
+        <article class="panel">
+          <div class="panel-header"><div><span class="panel-kicker">Bağlantı profili</span><h3>WAN yapılandırması</h3></div><span class="badge neutral">Salt okunur demo</span></div>
+          <div class="form-grid">
+            <label>Servis adı<input value="TTNET_VDSL" disabled></label>
+            <label>VLAN ID<input value="35" disabled></label>
+            <label>MTU<input value="1492" disabled></label>
+            <label>IP sürümü<select disabled><option>IPv4 / IPv6</option></select></label>
+          </div>
+        </article>
+      </section>
+
+      <section class="page" id="page-wifi" data-title="Wi‑Fi" data-eyebrow="Kablosuz ağ">
+        <div class="section-grid two-columns">
+          <article class="panel wifi-card">
+            <div class="panel-header"><div><span class="panel-kicker">Ana ağ</span><h3>CaYaHome</h3></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+            <div class="wifi-hero"><span data-icon="wifi"></span><div><strong>2.4 GHz</strong><small>802.11n • Kanal 6 • WPA2</small></div></div>
+            <dl class="detail-list compact"><div><dt>Bağlı cihaz</dt><dd>5</dd></div><div><dt>Kanal genişliği</dt><dd>20 MHz</dd></div><div><dt>Sinyal</dt><dd>İyi</dd></div></dl>
+            <button class="secondary-button demo-action">Ağı düzenle</button>
+          </article>
+          <article class="panel wifi-card guest">
+            <div class="panel-header"><div><span class="panel-kicker">Misafir ağı</span><h3>CaYaGuest</h3></div><label class="switch"><input type="checkbox"><span></span></label></div>
+            <div class="wifi-hero"><span data-icon="users"></span><div><strong>Kapalı</strong><small>Ayrı ve güvenli misafir erişimi</small></div></div>
+            <dl class="detail-list compact"><div><dt>İstemci yalıtımı</dt><dd>Açık</dd></div><div><dt>Süre sınırı</dt><dd>4 saat</dd></div><div><dt>Hız sınırı</dt><dd>20 Mbps</dd></div></dl>
+            <button class="secondary-button demo-action">Misafir ağı oluştur</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-devices" data-title="Bağlı Cihazlar" data-eyebrow="Yerel ağ istemcileri">
+        <article class="panel">
+          <div class="panel-header stacked-mobile">
+            <div><span class="panel-kicker">6 aktif istemci</span><h3>Cihaz listesi</h3></div>
+            <div class="toolbar"><input id="deviceSearch" type="search" placeholder="Cihaz ara"><select id="deviceFilter"><option value="all">Tümü</option><option value="wifi">Kablosuz</option><option value="ethernet">Kablolu</option></select></div>
+          </div>
+          <div class="device-table-wrap"><table class="device-table"><thead><tr><th>Cihaz</th><th>Bağlantı</th><th>IP adresi</th><th>Aktivite</th><th></th></tr></thead><tbody id="deviceTableBody"></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="page" id="page-security" data-title="Güvenlik" data-eyebrow="Koruma ve erişim">
+        <div class="section-grid three-columns">
+          <article class="panel security-card"><span class="security-icon success"><span data-icon="shield"></span></span><h3>Güvenlik duvarı</h3><p>WAN tarafından gelen istenmeyen bağlantılar engelleniyor.</p><label class="switch"><input type="checkbox" checked><span></span></label></article>
+          <article class="panel security-card"><span class="security-icon success"><span data-icon="lock"></span></span><h3>WPA2 koruması</h3><p>Ana kablosuz ağ güçlü şifreleme kullanıyor.</p><span class="badge success">Etkin</span></article>
+          <article class="panel security-card"><span class="security-icon warning"><span data-icon="alert"></span></span><h3>Uzaktan yönetim</h3><p>WAN üzerinden yönetim erişimi kapalı tutuluyor.</p><span class="badge success">Güvenli</span></article>
+        </div>
+      </section>
+
+      <section class="page" id="page-system" data-title="Sistem" data-eyebrow="Cihaz yönetimi">
+        <div class="section-grid two-columns">
+          <article class="panel detail-card">
+            <div class="panel-header"><div><span class="panel-kicker">Cihaz</span><h3>Sistem bilgileri</h3></div></div>
+            <dl class="detail-list"><div><dt>Model</dt><dd>VMG3312-B10B</dd></div><div><dt>Firmware</dt><dd>1.00(AAPP.7)</dd></div><div><dt>Donanım</dt><dd>Broadcom 963168VX</dd></div><div><dt>Yerel IP</dt><dd>192.168.1.1</dd></div></dl>
+          </article>
+          <article class="panel quick-actions">
+            <div class="panel-header"><div><span class="panel-kicker">Bakım</span><h3>Hızlı işlemler</h3></div></div>
+            <button class="action-row demo-action"><span data-icon="backup"></span><div><strong>Yapılandırmayı yedekle</strong><small>Ayarların bir kopyasını indir</small></div><span>›</span></button>
+            <button class="action-row demo-action"><span data-icon="refresh"></span><div><strong>Modemi yeniden başlat</strong><small>Bağlantı kısa süre kesilir</small></div><span>›</span></button>
+            <button class="action-row demo-action"><span data-icon="update"></span><div><strong>Firmware yönetimi</strong><small>Mevcut sürüm AAPP7</small></div><span>›</span></button>
+          </article>
+        </div>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

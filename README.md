@@ -44,6 +44,11 @@ tools/
 
 docs/
   firmware-analysis.md         Public summary of the stock AAPP7 image analysis
+
+ui-prototype/
+  index.html                   Modern CaYaRouter Lab dashboard prototype
+  styles.css                   Responsive light/dark interface styles
+  app.js                       Navigation, mock devices, theme, and demo interactions
 ```
 
 Generated modem reports, authenticated captures, credentials, configuration backups, raw firmware images, and other sensitive device data are intentionally excluded from Git.
@@ -74,12 +79,13 @@ Completed:
 - Big-endian JFFS2 validation and complete path reconstruction
 - CRC-verified root filesystem extraction
 - Read-only local preview of the extracted stock web interface
+- Responsive CaYaRouter Lab dashboard prototype with light/dark themes
 
 Planned:
 
 - Vendor firmware header and checksum field analysis
 - Stock web-interface comparison and mock-data coverage expansion
-- Read-only CaYaRouter dashboard prototype
+- Read-only live-data adapter for the CaYaRouter dashboard
 - Lightweight API adapter for stock Zyxel services
 - Recovery workflow documentation
 - Controlled test build that changes only non-critical web assets
