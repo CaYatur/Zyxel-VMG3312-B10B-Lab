@@ -10,7 +10,6 @@
   var pathLabel = document.getElementById('viewerPath');
   var pageTitle = document.getElementById('pageTitle');
   var nav = document.getElementById('mainNav');
-  var catalog = document.getElementById('moduleCatalog');
   var viewer = document.getElementById('viewer');
   var search = document.getElementById('moduleSearch');
   var liveBadge = document.getElementById('liveBadge');
@@ -62,7 +61,6 @@
     pageTitle.textContent = module.title;
     title.textContent = module.title;
     viewer.hidden = false;
-    catalog.hidden = true;
     Array.prototype.forEach.call(nav.querySelectorAll('.nav-button'), function(button){
       button.classList.toggle('active', button.getAttribute('data-module-id') === module.id);
     });
@@ -330,18 +328,32 @@
     modules.forEach(function(module){var category = module.category || 'Diğer';(groups[category] || (groups[category] = [])).push(module);});
     Object.keys(groups).sort().forEach(function(category){var heading = document.createElement('div');heading.className = 'nav-section';heading.textContent = category;nav.appendChild(heading);groups[category].forEach(function(module){nav.appendChild(buttonFor(module));});});
   }
-  function buildCatalog(query){
-    var normalized = str(query).toLocaleLowerCase('tr');var visible = modules.filter(function(module){return !normalized || str(module.title).toLocaleLowerCase('tr').indexOf(normalized) >= 0 || str(module.category).toLocaleLowerCase('tr').indexOf(normalized) >= 0;});
-    catalog.innerHTML = '';var groups = {};visible.forEach(function(module){(groups[module.category || 'Diğer'] || (groups[module.category || 'Diğer'] = [])).push(module);});
-    if(!visible.length){var empty = document.createElement('div');empty.className = 'empty';empty.textContent = 'Eşleşen modem modülü bulunamadı.';catalog.appendChild(empty);return;}
-    Object.keys(groups).sort().forEach(function(category){var section = document.createElement('section');section.className = 'catalog-group';var heading = document.createElement('h2');heading.textContent = category;section.appendChild(heading);var grid = document.createElement('div');grid.className = 'module-grid';groups[category].forEach(function(module){var card = document.createElement('button');card.type = 'button';card.className = 'module-card';var strong = document.createElement('strong');strong.textContent = module.title;var small = document.createElement('small');small.textContent = String(pageList(module).length) + ' yerel ayar ekranı';card.appendChild(strong);card.appendChild(small);card.addEventListener('click', function(){openModule(module);});grid.appendChild(card);});section.appendChild(grid);catalog.appendChild(section);});
+  function filterNavigation(query){
+    var normalized = str(query).trim().toLocaleLowerCase('tr');
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-button'), function(button){
+      var matches = !normalized || button.textContent.toLocaleLowerCase('tr').indexOf(normalized) >= 0;
+      button.hidden = !matches;
+    });
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-section'), function(section){
+      var visible = false;
+      var sibling = section.nextElementSibling;
+      while(sibling && !sibling.classList.contains('nav-section')){
+        if(sibling.classList.contains('nav-button') && !sibling.hidden){visible = true;break;}
+        sibling = sibling.nextElementSibling;
+      }
+      section.hidden = !visible;
+    });
+    if(tabs.parentElement === nav){
+      var activeButton = nav.querySelector('.nav-button.active');
+      tabs.hidden = Boolean(normalized && (!activeButton || activeButton.hidden));
+    }
   }
 
-  search.addEventListener('input', function(){var hasQuery = search.value.trim().length > 0;catalog.hidden = !hasQuery;viewer.hidden = hasQuery;if(hasQuery){buildCatalog(search.value);pageTitle.textContent = 'Modül Arama';}});
+  search.addEventListener('input', function(){filterNavigation(search.value);});
   document.getElementById('reloadButton').addEventListener('click', function(){if(activePage){openPage(activePage, activePageIndex);}});
   document.getElementById('logoutButton').addEventListener('click', function(){window.top.location.href = '/login/logout.cgi';});
 
-  buildNavigation();buildCatalog('');
+  buildNavigation();
   var requested = decodeURIComponent((window.location.hash || '').replace(/^#/, ''));
   openModule(requested === overview.id ? overview : (modules.find(function(module){return module.id === requested;}) || overview));
 })();
