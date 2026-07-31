@@ -17,18 +17,19 @@ STOCK_SHA256 = "407fef65a84ae6fce1cfcfc5ef03c298abe6503b998930d32da9a02b4f108898
 JFFS2_OFFSET = 0x20000
 JFFS2_END = 0x1100000
 EXPECTED_PREFIX = bytes.fromhex("360000004d5354435f343030650034303065")
-EXPECTED_FILES = 1154
+EXPECTED_FILES = 1155
 EXPECTED_SYMLINKS = 225
-EXPECTED_ACTIVE_PATHS = 1738
+EXPECTED_ACTIVE_PATHS = 1739
 EXPECTED_COMMON_FILES = 1147
 EXPECTED_REMOVED = 28
-EXPECTED_ADDED = 7
+EXPECTED_ADDED = 8
 REQUIRED_PATHS = {
     "/webs/Brick/index.html",
     "/webs/Brick/login/login.html",
     "/webs/Brick/caya/caya-app.html",
     "/webs/Brick/caya/caya-app.css",
     "/webs/Brick/caya/caya-app.js",
+    "/webs/Brick/caya/caya-bridge-compat.js",
     "/webs/Brick/caya/caya-login.css",
     "/webs/Brick/caya/live-modules.js",
     "/webs/Brick/caya/caya-loader.js",

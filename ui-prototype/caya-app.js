@@ -290,7 +290,12 @@
         return innerDoc;
       }catch(ignore){return null;}
     }
-    var directNode = outer.querySelector('#contentPanel,form,table,input,select,textarea,button');
+    var contentPanel = outer.querySelector('#contentPanel');
+    if(contentPanel){
+      var loadedContent = contentPanel.querySelector('form,table,input,select,textarea,button,.gridStyle-table,.contentPanel');
+      return loadedContent && clean(contentPanel.textContent) ? outer : null;
+    }
+    var directNode = outer.querySelector('form,table,input,select,textarea,button');
     return directNode && clean(outer.body.textContent) ? outer : null;
   }
 

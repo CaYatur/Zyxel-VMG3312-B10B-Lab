@@ -32,6 +32,7 @@ required=(
   "$TARGET_FS/webs/Brick/caya/caya-app.html"
   "$TARGET_FS/webs/Brick/caya/caya-app.css"
   "$TARGET_FS/webs/Brick/caya/caya-app.js"
+  "$TARGET_FS/webs/Brick/caya/caya-bridge-compat.js"
   "$TARGET_FS/webs/Brick/caya/caya-login.css"
   "$TARGET_FS/webs/Brick/caya/live-modules.js"
   "$TARGET_FS/webs/Brick/caya/caya-loader.js"

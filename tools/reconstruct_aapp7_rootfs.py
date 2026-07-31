@@ -177,6 +177,7 @@ def main() -> int:
         "caya-app.html",
         "caya-app.css",
         "caya-app.js",
+        "caya-bridge-compat.js",
         "caya-login.css",
         "live-modules.js",
     )
