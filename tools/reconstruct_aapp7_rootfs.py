@@ -39,6 +39,25 @@ def clean_mode(mode_octal: str) -> int:
     return int(mode_octal, 8) & 0o7777
 
 
+def set_default_account_passwords(config_path: Path) -> list[str]:
+    """Set only the admin/root default passwords to Base64("1234")."""
+    text = config_path.read_text(encoding="utf-8", errors="strict")
+    changed: list[str] = []
+    for username in ("admin", "root"):
+        pattern = re.compile(
+            rf"(<User\s+instance=\"\d+\">(?:(?!</User>).)*?"
+            rf"<Username>{username}</Username>(?:(?!</User>).)*?"
+            rf"<Password>)([^<]*)(</Password>)",
+            re.DOTALL,
+        )
+        text, count = pattern.subn(r"\g<1>MTIzNA==\g<3>", text, count=1)
+        if count != 1:
+            raise RuntimeError(f"Expected exactly one {username} account in {config_path}")
+        changed.append(username)
+    config_path.write_text(text, encoding="utf-8", newline="")
+    return changed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--extracted", type=Path, required=True)
@@ -51,6 +70,11 @@ def main() -> int:
         "--prune-unrelated-web-assets",
         action="store_true",
         help="Remove unreferenced assets for other router models and Thumbs.db files",
+    )
+    parser.add_argument(
+        "--default-admin-root-1234",
+        action="store_true",
+        help="Set only the default admin and root account passwords to 1234",
     )
     args = parser.parse_args()
 
@@ -74,6 +98,10 @@ def main() -> int:
         if path.exists() or path.is_symlink():
             path.unlink()
         os.symlink(item["target"], path)
+
+    default_password_accounts: list[str] = []
+    if args.default_admin_root_1234:
+        default_password_accounts = set_default_account_passwords(output / "etc" / "default.cfg")
 
     pruned: list[str] = []
     if args.prune_unrelated_web_assets:
@@ -143,6 +171,7 @@ def main() -> int:
         "special_entries": len(manifest["special_entries"]),
         "output": str(output),
         "device_table": str(args.device_table.resolve()),
+        "default_password_accounts": default_password_accounts,
         "pruned_web_assets": pruned,
         "stock_ui_preserved": (output / "webs" / "Brick" / "index.html").is_file(),
         "caya_ui_present": all((caya_dir / name).is_file() for name in ui_files),

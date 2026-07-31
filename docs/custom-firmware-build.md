@@ -97,14 +97,24 @@ The final local, git-ignored release candidate is:
 Release SHA-256:
 
 ```text
-41b27ea9f1e4d7db0e349cdbce7b68c75385281e66fa4be3b76d4faaba0103d2
+8d9b175ebe9a3074fa8f46e870e86a498f4bd108dfe5429bb2ab2b6015668a24
 ```
+
+The default management accounts are intentionally configured as requested:
+
+```text
+admin / 1234
+root  / 1234
+```
+
+The existing first-login password warning and Skip behavior remain unchanged.
+TR-069, PPPoE, and other service credentials are not modified.
 
 The strict release guard passes every required check: zero JFFS2 CRC failures,
 1,153 files, 225 symlinks, 202 preserved special entries, an identical kernel,
-zero changed files among 1,147 common stock files, the six expected CaYaRouter
-files, and the 28 expected unrelated web assets removed to remain inside the
-stock JFFS2 partition.
+one intentional changed stock file (`/etc/default.cfg`) containing only the two
+management-password replacements, the six expected CaYaRouter files, and the 28
+expected unrelated web assets removed to remain inside the stock JFFS2 partition.
 
 No custom firmware has been sent to the modem. A controlled device test still
 requires separate, explicit final approval. Passing the offline and live tests

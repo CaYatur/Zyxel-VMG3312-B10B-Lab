@@ -109,7 +109,14 @@ def main() -> int:
         "expected_active_path_count": summary.get("active_paths") == EXPECTED_ACTIVE_PATHS,
         "required_paths_present": REQUIRED_PATHS.issubset(paths),
         "tree_comparison_ok": tree_report.get("ok") is True,
-        "common_files_unchanged": tree_report.get("changed_common_count") == 0,
+        "only_default_cfg_changed": (
+            tree_report.get("changed_common_count") == 1
+            and tree_report.get("only_expected_common_file_changed") is True
+        ),
+        "default_cfg_only_password_fields_changed": (
+            tree_report.get("default_cfg_only_password_fields_changed") is True
+        ),
+        "admin_root_default_to_1234": tree_report.get("admin_root_are_1234") is True,
         "expected_common_file_count": tree_report.get("common_files") == EXPECTED_COMMON_FILES,
         "expected_removed_count": tree_report.get("removed_count") == EXPECTED_REMOVED,
         "expected_added_count": tree_report.get("added_count") == EXPECTED_ADDED,
