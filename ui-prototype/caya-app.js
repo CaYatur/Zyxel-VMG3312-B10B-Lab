@@ -215,6 +215,64 @@
     return button;
   }
 
+  function tableActionLabel(source){
+    var label = clean(source.value || source.textContent || source.title || source.getAttribute('aria-label'));
+    var classes = String(source.className || '');
+    if(label){return label;}
+    if(/edit|modify/i.test(classes) || source.id === 'editBtn'){return 'Düzenle';}
+    if(/delete|remove/i.test(classes) || source.id === 'deleteBtn'){return 'Sil';}
+    if(/active_on/i.test(classes)){return 'Devre dışı bırak';}
+    if(/active_off/i.test(classes)){return 'Etkinleştir';}
+    if(/add|new/i.test(classes)){return 'Ekle';}
+    return 'İşlem';
+  }
+
+  function tableActionButton(source){
+    var button = document.createElement('button');
+    var label = tableActionLabel(source);
+    button.type = 'button';
+    button.className = 'table-action';
+    button.textContent = label;
+    if(/sil|delete|remove/i.test(label)){button.classList.add('danger');}
+    if(/etkinleştir|devre dışı/i.test(label)){button.classList.add('toggle');}
+    button.disabled = Boolean(source.disabled || source.getAttribute('aria-disabled') === 'true');
+    button.addEventListener('click', function(event){
+      event.preventDefault();
+      if(button.classList.contains('danger') && !window.confirm(label + ' işlemi gerçek modeme uygulanacak. Devam edilsin mi?')){return;}
+      try{
+        syncControls();
+        setStatus(label + ' işlemi açılıyor…');
+        source.click();
+        window.setTimeout(function(){renderBridge();}, 500);
+      }catch(error){setStatus('Tablo işlemi çalıştırılamadı: ' + error.message, 'error');}
+    });
+    return button;
+  }
+
+  function renderTableControl(source){
+    var type = String(source.type || source.tagName || '').toLowerCase();
+    var proxy;
+    if(source.tagName === 'SELECT'){
+      proxy = document.createElement('select');
+      Array.prototype.forEach.call(source.options, function(option){
+        var copy = document.createElement('option');
+        copy.value = option.value;
+        copy.textContent = clean(option.textContent) || option.value;
+        copy.selected = option.selected;
+        proxy.appendChild(copy);
+      });
+    }else{
+      proxy = document.createElement('input');
+      proxy.type = type === 'radio' ? 'radio' : (type === 'checkbox' ? 'checkbox' : 'text');
+      if(type === 'checkbox' || type === 'radio'){proxy.checked = source.checked;}
+      else{proxy.value = source.value || '';}
+    }
+    proxy.disabled = source.disabled;
+    proxy.className = 'table-control';
+    controlLinks.push({source: source, proxy: proxy});
+    return proxy;
+  }
+
   function renderTable(source){
     var wrap = document.createElement('div');
     wrap.className = 'native-table-wrap';
@@ -225,7 +283,23 @@
       Array.prototype.forEach.call(row.children, function(cell){
         if(cell.tagName !== 'TD' && cell.tagName !== 'TH'){return;}
         var outCell = document.createElement(cell.tagName.toLowerCase());
-        outCell.textContent = clean(cell.textContent);
+        var plain = clean(cell.childNodes.length === 1 ? cell.textContent : Array.prototype.filter.call(cell.childNodes, function(node){return node.nodeType === 3;}).map(function(node){return node.textContent;}).join(' '));
+        if(plain){
+          var text = document.createElement('span');
+          text.textContent = plain;
+          outCell.appendChild(text);
+        }
+
+        var controls = cell.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]),select');
+        Array.prototype.forEach.call(controls, function(control){outCell.appendChild(renderTableControl(control));});
+
+        var actions = cell.querySelectorAll('a[href],a[onclick],button,input[type=button],input[type=submit],input[type=image]');
+        if(actions.length){
+          var actionWrap = document.createElement('div');
+          actionWrap.className = 'table-actions';
+          Array.prototype.forEach.call(actions, function(action){actionWrap.appendChild(tableActionButton(action));});
+          outCell.appendChild(actionWrap);
+        }
         outRow.appendChild(outCell);
       });
       if(outRow.children.length){table.appendChild(outRow);}
@@ -263,13 +337,14 @@
       if(source.offsetParent === null && source.type !== 'hidden'){return;}
       actions.appendChild(actionButton(source, activeModule ? activeModule.risk : 'normal'));
     });
-    if(!buttons.length){
+    if(!buttons.length && grid.children.length){
       var submit = document.createElement('button');
       submit.type = 'button';submit.className = 'native-action';submit.textContent = 'Kaydet';
       submit.addEventListener('click', function(){try{syncControls();form.requestSubmit ? form.requestSubmit() : form.submit();setStatus('Ayarlar modeme gönderildi.', 'success');}catch(error){setStatus(error.message, 'error');}});
       actions.appendChild(submit);
     }
-    card.appendChild(actions);
+    if(actions.children.length){card.appendChild(actions);}
+    if(!formTables.length && !grid.children.length && !actions.children.length){return null;}
     return card;
   }
 
@@ -323,16 +398,20 @@
     panel.innerHTML = '';
     controlLinks = [];
     var forms = Array.prototype.slice.call(doc.forms || []);
-    forms.forEach(function(form, index){panel.appendChild(renderForm(form, doc, index));});
+    var renderedForms = 0;
+    forms.forEach(function(form, index){
+      var rendered = renderForm(form, doc, index);
+      if(rendered){panel.appendChild(rendered);renderedForms += 1;}
+    });
     var tables = Array.prototype.slice.call(doc.querySelectorAll('table')).filter(function(table){return table.querySelectorAll('tr').length > 1 && !table.closest('form');});
     tables.slice(0, 12).forEach(function(table){
       var card = document.createElement('section');card.className = 'native-card';card.appendChild(renderTable(table));panel.appendChild(card);
     });
-    if(!forms.length && !tables.length){
+    if(!renderedForms && !tables.length){
       var info = document.createElement('section');info.className = 'native-card';
       var text = document.createElement('div');text.className = 'native-info';text.textContent = bodyText || 'Bu modül görüntülenebilir veri döndürmedi.';info.appendChild(text);panel.appendChild(info);
     }
-    setStatus(forms.length + ' ayar formu ve ' + tables.length + ' bilgi tablosu canlı cihazdan yüklendi.', 'success');
+    setStatus(renderedForms + ' ayar grubu ve ' + tables.length + ' bağımsız bilgi tablosu canlı cihazdan yüklendi.', 'success');
   }
 
   bridge.addEventListener('load', function(){
