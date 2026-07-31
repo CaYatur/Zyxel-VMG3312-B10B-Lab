@@ -1,0 +1,30 @@
+# CaYa Agent private state and credentials
+.caya-agent/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Modem backups, firmware images and raw authenticated captures
+*.conf
+*.bin
+*.img
+*.rom
+*.dump
+research/index_authenticated.html
+research/zyxel_*.json
+research/menu.json
+research/jsonParser.js
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
