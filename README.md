@@ -41,9 +41,13 @@ tools/
   jffs2_path_mapper.py         Big-endian JFFS2 inode and path mapper
   jffs2_extract.py             CRC-verified JFFS2 regular-file extractor
   stock_ui_preview.py          Read-only local preview server for the extracted stock UI
+  prepare_custom_firmware_workspace.py  Adds /caya/ without replacing stock UI
+  firmware_candidate_guard.py  Conservative offline custom-image checks
+  build_caya_firmware_linux.sh Vendor-tool fs+kernel build recipe for Linux
 
 docs/
   firmware-analysis.md         Public summary of the stock AAPP7 image analysis
+  custom-firmware-build.md     Custom build scope, validation, and recovery status
 
 ui-prototype/
   index.html                   Full CaYaRouter Lab management shell
