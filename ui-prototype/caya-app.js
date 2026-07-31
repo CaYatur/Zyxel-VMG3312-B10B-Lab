@@ -99,6 +99,8 @@
     activePageIndex = Number(pageIndex || 0);
     var displayUrl = resolvePage(activeModule, page);
     var bridgeUrl = resolveBridge(activeModule, page, activePageIndex);
+    window.CAYA_BRIDGE_PAGE = displayUrl;
+    window.CAYA_BRIDGE_BASE = displayUrl.replace(/[?#].*$/, '').replace(/\/[^/]*$/, '/');
     pathLabel.textContent = displayUrl;
     Array.prototype.forEach.call(tabs.querySelectorAll('.page-tab'), function(button){button.classList.toggle('active', Number(button.dataset.index) === activePageIndex);});
     panel.innerHTML = '';

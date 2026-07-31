@@ -34,4 +34,5 @@
 .ui-dialog.caya-stock-dialog [style*="display:none"],.ui-dialog.caya-stock-dialog [style*="display: none"]{display:none!important}
 .ui-dialog.caya-stock-dialog .buttonframe,.ui-dialog.caya-stock-dialog .button_frame{display:none!important}
 body.caya-dialog-open{overflow:hidden!important}
+.caya-dialog-error{display:grid;gap:8px;margin:18px;padding:16px;border:1px solid #efb8bd;border-radius:12px;background:#fff3f4;color:#8e2935}.caya-dialog-error strong{font-size:14px}.caya-dialog-error span{font-family:Consolas,monospace;font-size:11px;overflow-wrap:anywhere}
 @media(max-width:760px){.ui-dialog.caya-stock-dialog{top:8px!important;width:calc(100vw - 16px)!important;height:calc(100vh - 16px)!important}.ui-dialog.caya-stock-dialog .data_frame2>ul{grid-template-columns:1fr!important}.ui-dialog.caya-stock-dialog .w_text>ul{grid-template-columns:1fr!important;gap:6px!important}.ui-dialog.caya-stock-dialog .dialogContener{padding:12px!important}.ui-dialog.caya-stock-dialog .set1,.ui-dialog.caya-stock-dialog .set2{padding:14px!important}}

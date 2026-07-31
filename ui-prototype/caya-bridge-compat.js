@@ -15,6 +15,68 @@
   var jq = window.jQuery || window.$;
   if(!jq){return;}
 
+  function resolveLegacyUrl(rawUrl){
+    if(typeof rawUrl !== 'string' || !rawUrl){return rawUrl;}
+    var separator = rawUrl.indexOf(' ');
+    var urlPart = separator >= 0 ? rawUrl.slice(0, separator) : rawUrl;
+    var selectorPart = separator >= 0 ? rawUrl.slice(separator) : '';
+    if(/^(?:[a-z]+:)?\/\//i.test(urlPart) || urlPart.charAt(0) === '/' || urlPart.charAt(0) === '#'){
+      return urlPart + selectorPart;
+    }
+    if(/^pages\//i.test(urlPart)){
+      return '/' + urlPart + selectorPart;
+    }
+    var base = window.CAYA_BRIDGE_BASE || '/pages/';
+    try{
+      var resolved = new URL(urlPart, window.location.origin + base);
+      return resolved.pathname + resolved.search + resolved.hash + selectorPart;
+    }catch(error){
+      return urlPart + selectorPart;
+    }
+  }
+
+  if(jq.fn && jq.fn.load && !jq.fn.load.cayaWrapped){
+    var originalLoad = jq.fn.load;
+    var wrappedLoad = function(url, params, callback){
+      return originalLoad.call(this, resolveLegacyUrl(url), params, callback);
+    };
+    wrappedLoad.cayaWrapped = true;
+    jq.fn.load = wrappedLoad;
+  }
+
+  if(jq.ajax && !jq.ajax.cayaWrapped){
+    var originalAjax = jq.ajax;
+    var wrappedAjax = function(url, options){
+      if(typeof url === 'string'){
+        var directSettings = options && typeof options === 'object' && jq.extend ? jq.extend({}, options) : (options || {});
+        directSettings.url = resolveLegacyUrl(url);
+        return originalAjax.call(jq, directSettings);
+      }
+      if(url && typeof url === 'object' && typeof url.url === 'string'){
+        var settings = jq.extend ? jq.extend({}, url) : url;
+        settings.url = resolveLegacyUrl(settings.url);
+        return originalAjax.call(jq, settings);
+      }
+      return originalAjax.apply(jq, arguments);
+    };
+    wrappedAjax.cayaWrapped = true;
+    jq.ajax = wrappedAjax;
+  }
+
+  ['get','post','getJSON','getScript'].forEach(function(method){
+    if(!jq[method] || jq[method].cayaWrapped){return;}
+    var original = jq[method];
+    var wrapped = function(url){
+      var args = Array.prototype.slice.call(arguments);
+      args[0] = resolveLegacyUrl(url);
+      return original.apply(jq, args);
+    };
+    wrapped.cayaWrapped = true;
+    jq[method] = wrapped;
+  });
+
+  window.CAYA_RESOLVE_LEGACY_URL = resolveLegacyUrl;
+
   jq.hciAlert = jq.hciAlert || function(message){
     var plain = String(message == null ? '' : message).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     window.alert(plain || 'Modem işlemi tamamlanamadı.');
@@ -32,6 +94,36 @@
       container.setBtnAttr = function(){return container;};
       return container;
     };
+  }
+
+  var originalDialogFactory = jq.zyUiDialog;
+  if(originalDialogFactory && !originalDialogFactory.cayaWrapped){
+    var wrappedDialogFactory = function(options){
+      var container = originalDialogFactory.call(jq, options || {});
+      if(container && container.load && !container.load.cayaWrapped){
+        var originalContainerLoad = container.load;
+        var wrappedContainerLoad = function(url, params, callback){
+          var normalizedUrl = resolveLegacyUrl(url);
+          var userCallback = typeof params === 'function' ? params : callback;
+          var requestData = typeof params === 'function' ? undefined : params;
+          return originalContainerLoad.call(this, normalizedUrl, requestData, function(responseText, status, xhr){
+            if(status === 'error'){
+              container.html('<div class="caya-dialog-error"><strong>İçerik yüklenemedi.</strong><span>' + normalizedUrl + '</span></div>');
+            }
+            if(typeof userCallback === 'function'){
+              userCallback.call(this, responseText, status, xhr);
+            }
+            window.setTimeout(refreshDialogState, 0);
+          });
+        };
+        wrappedContainerLoad.cayaWrapped = true;
+        container.load = wrappedContainerLoad;
+      }
+      window.setTimeout(refreshDialogState, 0);
+      return container;
+    };
+    wrappedDialogFactory.cayaWrapped = true;
+    jq.zyUiDialog = wrappedDialogFactory;
   }
 
   function normalizeDialog(dialog){
